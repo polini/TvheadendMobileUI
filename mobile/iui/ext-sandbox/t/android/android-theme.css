@@ -1,0 +1,270 @@
+/* Theme created by Remi Grumeau http://www.remi-grumeau.com */
+
+@font-face {
+	font-family:	droid;
+	src:	local(DroidSans),
+			url(droidsans.ttf);
+}
+
+body {
+	font-family:	droid;
+	color: 			#f0f0f0;
+	background:		#181818;
+}
+body > *:not(.toolbar) {
+	top: 			25px;
+}
+
+li > a[selected], li > a:active {
+	color:	#000;
+    background-image:	url(listArrow.png),
+    					-webkit-gradient(linear, left top, left bottom, 
+							from(#ad4500),
+							color-stop(0.1, #ff7500),
+							color-stop(0.5, #ff9200),
+							color-stop(0.8, #ff9200),
+               				to(#ff6900)
+               			);
+    background-image: 	url(listArrow.png),
+    					-moz-linear-gradient(270deg, 
+    						#ad4500 0%, 
+    						#ff7500 10%,
+    						#ff9200 50%,
+    						#ff9200 50%,
+    						#ff6900 100%
+    					);
+}
+
+li > a[selected="progress"] {
+	background-image:	url(loading.gif),
+    					-webkit-gradient(linear, left top, left bottom, 
+							from(#ad4500),
+							color-stop(0.1, #ff7500),
+							color-stop(0.5, #ff9200),
+							color-stop(0.8, #ff9200),
+               				to(#ff6900)
+               			);
+    background-image: 	url(loading.gif),
+    					-moz-linear-gradient(270deg, 
+    						#ad4500 0%, 
+    						#ff7500 10%,
+    						#ff9200 50%,
+    						#ff9200 50%,
+    						#ff6900 100%
+    					);
+}
+
+/************************************************************************************************/
+
+body > .toolbar {
+	border: 		0px;
+	padding: 		0px 5px 10px 5px;
+    height: 		25px;
+	background: 	-webkit-gradient(linear, left top, left bottom, from(#9a9a9a), to(#7b7d7b));
+	background: 	-moz-linear-gradient(270deg, #9a9a9a 0%, #7b7d7b 100%);
+}
+.toolbar > h1,
+.dialog > h1 {
+	position:		absolute;
+    left: 			50%;
+    height:			auto;
+    margin: 		3px 0 0 -75px;
+    padding:		0px;
+    font-size: 		16px;
+    width: 			150px;
+    color: 			#FFF;
+    text-align:		center;
+	text-shadow:	rgba(0,0,0,.7) 0 1px 4px;
+}
+
+#backButton,
+.toolbar > .button,
+.dialog .button {
+	top: 			2px;
+	right:			2px;
+	width:			auto;
+	height:			auto;
+	margin:			0;
+	padding:		0px 8px;
+	color:			#000;
+	font-size:		12px;
+	line-height:	20px;
+	text-shadow:	none;
+    background-image:		-webkit-gradient(linear, left top, left bottom, from(#ebebeb), to(#d9d9d9));
+    background-image:		-moz-linear-gradient(270deg, #ebebeb 0%, #d9d9d9 100%);
+	-webkit-border-radius:	2px;
+	-moz-border-radius:		2px;
+    border-radius:			2px;
+}
+#backButton {
+	left:			2px;
+	right:			auto;
+}
+
+.toolbar > .blueButton {
+	color:		#d5d4d4;
+	background-image: 	-webkit-gradient(linear, left top, left bottom, from(#757575), to(#363636));
+	background-image: 	-moz-linear-gradient(270deg, #757575 0%, #363636 100%);
+}
+.toolbar > .redButton {
+	color:		#fff;
+	background-image:		-webkit-gradient(linear, left top, left bottom, from(#ff0000), to(#be0000))!important;
+	background-image:		-moz-linear-gradient(270deg, #ff0000 0%, #be0000 100%)!important;
+}
+
+
+.whiteButton,
+.grayButton {
+	font-weight:			normal;
+	font-size:				16px;
+	-webkit-border-radius:	5px;
+	-moz-border-radius:		5px;
+	border:					1px solid #565756;
+	text-shadow:			none;
+	margin:					2px 0;
+}
+
+.whiteButton[selected], .whiteButton:active,
+.grayButton[selected], .grayButton:active {
+	background-image:		-webkit-gradient(linear, left top, left bottom, 
+								from(#ff6900),
+								color-stop(0.2, #ff9200),
+								color-stop(0.5, #ff9c00),
+								color-stop(0.8, #ff9200),
+                				to(#ff6900)
+                			) !important;
+}
+
+.whiteButton {
+	color:					#424142;
+	background-image:		-webkit-gradient(linear, left top, left bottom, 
+								from(#f4f4f4),
+                				to(#c4c4c4)
+                			) !important;
+}
+.grayButton {
+	background-image:		-webkit-gradient(linear, left top, left bottom, 
+								from(#797979),
+								to(#444444)
+                			) !important;
+}
+
+/************************************************************************************************/
+
+body > ul > li {
+	padding:		15px 0 15px 10px;
+	font-size: 		18px;
+	font-weight:	normal;
+	border:			0px;
+    border-bottom:	1px solid rgba(255,255,255,.3);
+    background:		url(listArrow.png) no-repeat center right, #000;
+}
+body > ul > li.group {
+	padding:		2px 10px;
+	font-size:		14px;
+	font-weight:	normal;
+	text-shadow: 	rgba(0, 0, 0, 0.9) 1px 1px 3px;
+	border:			0px;
+	background:		-webkit-gradient(linear, left top, left bottom, from(#9c9a9c), to(#848284));
+	background:		-moz-linear-gradient(270deg, #9c9a9c 0%, #848284 100%);
+}
+body > ul > li > a {
+	margin:			-15px 0 -15px -10px;
+	padding:		15px 0 15px 10px;
+    background: 	none;
+}
+
+/************************************************************************************************/
+    
+body > .dialog {
+	top:		0px;
+	min-height:	437px;
+}
+.dialog  .button {
+	left:	auto;
+	width:	auto;
+}
+.dialog  .leftButton {
+	left:	2px;
+	right:	auto;
+	width:	auto;
+}
+.dialog > fieldset {
+	border: 		0px;
+	padding: 		0px 5px 10px 5px;
+	background-color:	#CCC;
+	background-repeat:	repeat-x;
+	background-size:	auto 25px;
+	background-image: 	-webkit-gradient(linear, left top, left bottom, from(#9a9a9a), to(#7b7d7b));
+	background-image: 	-moz-linear-gradient(270deg, #9a9a9a 0%, #7b7d7b 100%);
+}
+.dialog > fieldset > h1 {
+	padding-top:	3px;
+	font-size:		16px;
+	text-shadow:	rgba(0,0,0,.7) 0 1px 4px;
+}
+.dialog > fieldset label {
+	margin-top:		17px;
+}
+
+/************************************************************************************************/
+
+body > .panel {
+	color:				#181818;
+    background: 		#FFF;
+    border:				4px solid #181818;
+    border-position:	inside;
+    -webkit-border-radius:	15px;
+    -moz-border-radius:		15px;
+}
+body > .panel > h2 {
+	font-size:		20px;
+	margin:			-7px -7px 10px -7px;
+	padding: 		12px 0 12px 50px;
+	font-weight: 	normal;
+	color: 			#fff;
+	text-shadow: 	none;
+	background:		#424542 url(panelTitle.png) no-repeat 10px 9px;
+	-webkit-border-top-left-radius:		10px;
+	-webkit-border-top-right-radius:	10px;
+	-moz-border-radius-topleft:			10px;
+	-moz-border-radius-topright:		10px;
+}
+
+.toggle {
+    border:			1px solid #888888;
+    background: 	#FFFFFF url(toggle.png) repeat-x;
+}
+.toggle[toggled="true"] {
+    border:			1px solid #444;
+}
+
+.toggle[toggled="true"] {
+    background: 	#194fdb url(toggleOn.png) repeat-x;
+}
+
+.thumb {
+    background: 	#ffffff url(thumb.png) repeat-x;
+}
+
+/************************************************************************************************/
+#preloader {
+    display: 	none;
+    background-image: 	url(loading.gif),
+						url(selectionn.png),
+						url(blueButton.png),
+						url(listArrowSel.png),
+						url(listGroup.png);
+}
+
+.toolbar > h1.titleImg {
+	background:			url(title-img.png) no-repeat top center;
+	color:				rgba(0,0,0,0);
+}
+
+.backButtonImg {
+	width: 		50px;
+	background: url(back-img.png) no-repeat center left,
+	            url(backButtonBack.png) repeat-x top left !important;
+	color:		rgba(0,0,0,0);
+}

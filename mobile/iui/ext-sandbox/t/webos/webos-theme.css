@@ -1,0 +1,257 @@
+/* PalmOS theme for iUI framework
+/* Created by Remi Grumeau
+/* Dec 2009
+/* http://www.remi-grumeau.com
+*/
+body {
+	background:			#000;	
+}
+body > *:not(.toolbar) {
+    top: 					30px;
+	-webkit-border-radius: 	15px;
+	-moz-border-radius: 	15px;
+	border-radius: 			15px;
+	background:				#e8e8e6;
+}
+
+li > a[selected], li > a:active {
+	color:		#fff;
+    background-image: url(listArrowSel.png), url(selection.png) !important;
+}
+
+li > a[selected="progress"] {
+    background-image: url(loading.gif), url(selection.png) !important;
+}
+
+/************************************************************************************************/
+
+body > .toolbar {
+	position:		absolute;
+	width:			100%;
+	margin:			0;
+	background:		#000;
+    border:			0px;
+}
+body > .toolbar > h1,
+body > .dialog > h1 {
+    left: 			50%;
+    margin: 		1px 0 0 -75px;
+    height: 		auto;
+    font-size:		14px;
+	padding:		5px 0 5px 0;
+    text-shadow: 	none;
+}
+
+#backButton,
+.toolbar > .button,
+.dialog .button {
+    position: 		absolute;
+    overflow: 		hidden;
+    top:			0px;
+    right:			0px;
+    max-width:		65px;
+    margin-top:		0px;
+    padding: 		0px 14px;
+	background-image: 	-webkit-gradient(linear, left top, left bottom, from(#4d4d4d), to(#000))!important;
+	background-image:		-moz-linear-gradient(-90deg, #4d4d4d, #272727, #000, #111, #1f1f1f);
+	-moz-border-top-left-radius: 		7px;
+	-webkit-border-top-left-radius: 	7px;
+	-moz-border-top-right-radius: 		7px;
+	-webkit-border-top-right-radius: 	7px;
+	border-width:	none;
+}
+.blueButton {
+	background-image: 	-webkit-gradient(linear, left top, left bottom, from(#51abff), to(#000));
+	background-image:	-moz-linear-gradient(-90deg, #51abff 0%, #000 100%);
+}
+
+#backButton {
+    display: 		none;
+    left: 			0px;
+    right: 			auto;
+}
+
+
+.whiteButton, .grayButton {
+	font-weight:	normal;
+	font-size:		18px;
+}
+.whiteButton {
+	-moz-border-image:		url(whiteButton.png) 0 12 0 12;
+	-webkit-border-image:	url(whiteButton.png) 0 12 0 12;
+	text-shadow:			rgba(255, 255, 255, 0.7) 0 1px 0;
+}
+.grayButton {
+	-moz-border-image: 		url(grayButton.png) 0 12 0 12;
+	-webkit-border-image: 	url(grayButton.png) 0 12 0 12;
+	text-shadow:			rgba(0,0,0,.7) 0 -1px 0;
+}
+.whiteButton[selected], .whiteButton:active {
+	color:			#fff;
+	text-shadow:	rgba(0,0,0,.7) 0 -1px 0;
+}
+.grayButton[selected], .grayButton:active {
+	color:			#ccc;
+	text-shadow:	rgba(0,0,0,.7) 0 1px 0;
+}
+
+/************************************************************************************************/
+
+body > ul {
+	background:				#e8e8e6;
+}
+
+body > ul > li {
+    padding: 		12px 0 12px 10px;
+	font-weight:	normal;
+	font-size:		18px;
+	color:			#000;
+    border-top:		1px solid #fff;
+    border-bottom:	1px solid #cdcdcb;
+}
+body > ul > li:first-child {
+    border-top:		none;	
+}
+body > ul > li.group 
+{
+	padding:		1px auto;
+	padding-left:	24px;
+    background:		url(listgroup.png) no-repeat top left, -webkit-gradient(linear, left top, left bottom, 
+    					from(#88afd0),
+    					color-stop(0.3, #91bde1)
+       				)!important;
+	background:		url(listgroup.png) no-repeat top left, -moz-linear-gradient(-90deg, #88afd0 0%, #91bde1 30%)!important;
+    border:			0px;
+    z-index:		2;
+}
+
+body > ul > li > a 
+{
+    margin: 		-12px 0 -12px -10px;
+    padding: 		12px 0 12px 10px;
+	border-right:	0px!important;
+	border-bottom:	none;
+    background: 	url(listArrow.png) no-repeat right center;
+
+}
+
+/************************************************************************************************/
+
+body > .dialog {
+	top:		0px;
+	top:		0px;
+	min-height:	445px;
+	background:	rgba(0,0,0,.5);
+	-webkit-border-radius: 	0;
+	-moz-border-radius: 	0;
+	border-radius: 			0;
+}
+.dialog  .button {
+	left:	auto;
+	width:	auto;
+}
+.dialog  .leftButton {
+	left:	0px;
+	right:	auto;
+	width:	auto;
+}
+.dialog > fieldset {
+	border: 		0px;
+	padding: 		0px 5px 10px 5px;
+	background-color:	#000;
+}
+.dialog > fieldset > h1 {
+	padding:		6px 0;
+    font-size:		14px;
+}
+.dialog > fieldset label {
+	margin-top:		17px;
+	font-size:		12px;
+	color:			#fff;
+}
+.dialog > fieldset input {
+	color:			#fff;
+	border:			0px;
+	background:		#656564;
+    background: 	-webkit-gradient(linear, left top, left bottom, 
+    					from(#222),
+    						color-stop(.1, #656564),
+    					to(#656564));
+	background:		-moz-linear-gradient(-90deg, 
+						#222 0%, 
+							#656564 10%,
+						#656564 100%);
+    -webkit-border-radius:	10px;
+    -moz-border-radius:		10px;
+    border-radius:			10px;
+}
+
+/************************************************************************************************/
+
+.panel > h2 {
+    margin: 		0px auto 5px 0px;
+    padding:		11px 0px 11px 25px;
+    font-size:  	18px;
+    font-weight: 	normal;
+    color: 			#000;
+    text-shadow: 	none;
+    background:		-webkit-gradient(linear, left top, left bottom, 
+    					from(#babab8),
+    					to(#bdbdbb),
+    					color-stop(0.1, #a5a5a3),
+       					color-stop(0.5, #cdcdcb)
+       				)!important;
+	background:		-moz-linear-gradient(-90deg, #babab8 0%, #a5a5a3 10%, #cdcdcb 50%, #bdbdbb 100%)!important;
+	-moz-border-top-left-radius: 		15px;
+	-webkit-border-top-left-radius: 	15px;
+	-moz-border-top-right-radius: 		15px;
+	-webkit-border-top-right-radius: 	15px;
+
+}
+body > .panel {
+	padding:	0px 0px 10px 0px;
+    background: #e4e4e2;
+}
+body > .panel > *:not(h2) {
+	margin-left: 	10px;
+	margin-right:	10px;
+}
+body > .panel > fieldset {
+	border:			3px solid #7e7e7d;
+	background:		#e4e4e2;
+}
+.row > label {
+	font-weight:	normal;
+	text-align:		left;
+	font-size:		14px;
+	color:			#5099d8;
+}
+
+/************************************************************************************************/
+
+.toggle {
+    border: 	1px solid #888888;
+    background: #FFFFFF url(toggle.png) repeat-x;
+}
+
+.toggle[toggled="true"] {
+    background: #194fdb url(toggleOn.png) repeat-x;
+}
+
+.thumb {
+    background: #ffffff url(thumb.png) repeat-x;
+}
+
+/************************************************************************************************/
+#preloader {
+    display: none;
+    background-image: 	url(loading.gif), url(selection.png), url(blueButton.png), url(listArrowSel.png), url(listGroup.png);
+}
+
+
+.backButtonImg {
+  width: 50px;
+  background: url(back-img.png) no-repeat center left,
+              url(backButtonBack.png) repeat-x top left !important;
+  color: rgba(0,0,0,0);
+}

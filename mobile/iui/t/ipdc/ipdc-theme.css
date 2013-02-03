@@ -1,0 +1,103 @@
+/* ipdc-theme.css (c) 2007-2012 by iUI Project Members, see LICENSE.txt for license */
+body {
+	color: #40658A;
+	background: url(Logo_DevCamp.png);
+	background-position: 100% 60px;
+	background-repeat: no-repeat;
+}
+
+li > a[selected], li > a:active {
+    background-image: url(../default/listArrowSel.png), url(../default/selection.png) !important;
+}
+
+li > a[selected="progress"] {
+    background-image: url(../default/loading.gif), url(../default/selection.png) !important;
+}
+
+/************************************************************************************************/
+
+body > .toolbar {
+	border-top:	1px solid #585858;
+    background: url(toolbar.png) #6d84a2 repeat-x;
+}
+
+.button {
+    -webkit-border-image: url(toolButton.png) 0 5 0 5;
+    -moz-border-image: url(toolButton.png) 0 5 0 5;
+}
+
+.blueButton {
+    -webkit-border-image: url(blueButton.png) 0 5 0 5;
+    -moz-border-image: url(blueButton.png) 0 5 0 5;
+}
+
+#backButton {
+    -webkit-border-image: url(backButton.png) 0 8 0 14;
+    -moz-border-image: url(backButton.png) 0 8 0 14;
+}
+
+
+.whiteButton {
+    -webkit-border-image: url(../default/whiteButton.png) 0 12 0 12;
+    -moz-border-image: url(../default/whiteButton.png) 0 12 0 12;
+    text-shadow: rgba(255, 255, 255, 0.7) 0 1px 0;
+}
+
+.redButton {
+    -webkit-border-image: url(redButton.png) 0 12 0 12;
+    -moz-border-image: url(redButton.png) 0 12 0 12;
+}
+
+.grayButton {
+    -webkit-border-image: url(../default/grayButton.png) 0 12 0 12;
+    -moz-border-image: url(../default/grayButton.png) 0 12 0 12;
+    color: #FFFFFF;
+}
+
+/************************************************************************************************/
+
+body > ul > li.group {
+	opacity:0.7;
+    background: url(listGroup.png) repeat-x;
+}
+
+body > ul > li > a {
+    background: url(../default/listArrow.png) no-repeat right center;
+}
+
+/************************************************************************************************/
+    
+.dialog > fieldset {
+    background: #585858 url(toolbar.png) repeat-x;
+}
+.dialog > fieldset h1 {
+	height:		32px;
+}
+.dialog > fieldset > label {
+    margin-top: 	17px;
+}
+
+/************************************************************************************************/
+
+body > .panel {
+    background: #c5ccd4 url(pinstripes.png);
+}
+
+.toggle {
+    border: 1px solid #888888;
+    background: #FFFFFF url(../default/toggle.png) repeat-x;
+}
+
+.toggle[toggled="true"] {
+    background: #194fdb url(toggleOn.png) repeat-x;
+}
+
+.thumb {
+    background: #ffffff url(../default/thumb.png) repeat-x;
+}
+
+/************************************************************************************************/
+#preloader {
+    background-image: url(../default/loading.gif), url(../default/selection.png),
+        url(blueButton.png), url(../default/listArrowSel.png), url(listGroup.png);
+}
