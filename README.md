@@ -11,6 +11,8 @@ It uses the framework iUI {http://www.iui-js.org/}, which provides an iPhone-lik
 
 Have a look at the screenshots in the folder "screenshots"! 
 
+![ScreenShot](https://raw.github.com/polini/TvheadendMobileUI/master/screenshots/home.png)
+
 ## Features
 
  - Show channels by channel tag
