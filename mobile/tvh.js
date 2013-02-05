@@ -109,7 +109,7 @@ function getDuration(seconds) {
 
 function readSaveAutomaticRecorder(response) {
 	loadAutomaticRecorderList();
-	iui.showPageById('ar');
+	iui.goBack();
 }
 
 function createAutomaticRecorder(response) {
@@ -119,7 +119,7 @@ function createAutomaticRecorder(response) {
 
 function readDeleteAutomaticRecorder(response) {
 	loadAutomaticRecorderList();
-	iui.showPageById('ar');
+	iui.goBack();
 }
 
 function deleteAutomaticRecorder(id) {
