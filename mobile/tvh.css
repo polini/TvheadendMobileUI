@@ -18,6 +18,10 @@ img.pb.right {
 	margin-right: 5px;
 }
 
+img.pb.middle {
+	background: url(images/pb_middle.png) left center no-repeat;
+}
+
 img.pb {
 	margin: 4px 0px;
 	padding: 0px;
@@ -81,6 +85,7 @@ a.more {
 a.live {
 	text-align:center;
 	font-style:italic;
+	background: transparent;
 }
 
 a.inactive {

@@ -59,8 +59,7 @@ function nvl(val) {
 }
 
 function getAutomaticRecorderForm(e) {
-	divs = '';
-	divs += '<form id="ar_' + e.id + '" title="' + nvl(e.title) + '" class="panel">';
+	var divs = '';
 	divs += '<fieldset>';
 	divs += '<div class="row"><label>'+l('title')+'</label><input type="text" name="titel" value="' + nvl(e.title) + '" /></div>';
 	divs += '<div class="row"><label>'+l('enabled')+'</label><div id="enabled" class="toggle" onclick="return;" name="enabled" toggled="'+(e.enabled ? 'true' : 'false') + '"><span class="thumb"></span><span class="toggleOn">'+l('yes')+'</span><span class="toggleOff">'+l('no')+'</span></div></div>';
@@ -87,8 +86,13 @@ function getAutomaticRecorderForm(e) {
 	if (e.id != 'new') {
 		divs += '<p>&nbsp;</p><a class="redButton" href="javascript:deleteAutomaticRecorder(\''+e.id+'\');">'+l('delete')+'</a>';
 	}
-	divs += '</form>';
-	return divs;
+	if (document.getElementById('ar_'+e.id) != null) {
+		document.getElementById('ar_'+e.id).innerHTML = divs;
+		return '';
+	}
+	else {
+		return '<form id="ar_' + e.id + '" title="' + nvl(e.title) + '" class="panel">' + divs + '</form>';
+	}
 }
 
 function getTimeFromMinutes(minutes) {
@@ -126,7 +130,7 @@ function getProgressBar(width, percent) {
 	}
 	var html = '<img alt="'+percent+'%" src="images/pb_trans.png" class="pb left" height="10px" width="'+left+'px" />';
 	if (middle)
-		html += '<img alt="'+percent+'%" src="images/pb_middle.png" class="pb" height="10px" width="2px" />';
+		html += '<img alt="'+percent+'%" src="images/pb_trans.png" class="pb middle" height="10px" width="2px" />';
 	html += '<img alt="'+percent+'%" src="images/pb_trans.png" class="pb right" height="10px" width="'+right+'px" />';
 	return html;
 }
@@ -341,7 +345,7 @@ function getRecordingForm(e, type) {
 		return '';
 	}
 	else {
-		return divs += '<form id="rec_' + e.id + '" title="' + e.title + '" class="panel">' + divs + '</form>';
+		return '<form id="rec_' + e.id + '" title="' + e.title + '" class="panel">' + divs + '</form>';
 	}
 }
 
@@ -429,7 +433,7 @@ function getEpgForm(e) {
 		return '';
 	}
 	else {
-		return '<form id="epg_' + e.id + '" title="' + e.title + '" class="panel">' + divs + '</form>';
+		return '<form id="epg_' + e.id + '" title="' + e.title + '" class="panel" channel="'+e.channel+'">' + divs + '</form>';
 	}
 }
 
@@ -468,6 +472,7 @@ function showChannelInfos(tag) {
 								html += '<span class="epsiode">'+e.episode+'</span>';
 							html += '</b>';
 							html += (e.subtitle!=undefined&&e.title!=e.subtitle?'<br />'+e.subtitle:'');
+							break;
 						}
 					}
 				}
@@ -482,6 +487,17 @@ function reloadChannelEpg(channel) {
 		var e = channels[i];
 		if (e.name == channel) {
 			loadEpg(e.chid, channel, true);
+			break;
+		}
+	}
+}
+
+function reloadChannelIdEpg(channel) {
+	for (var i in channels) {	
+		var e = channels[i];
+		if (e.chid == channel) {
+			loadEpg(channel, e.name, true);
+			break;
 		}
 	}
 }
@@ -572,8 +588,11 @@ function readRecordings(response) {
 	append(divs);
 }
 
+var lastRecordingType = undefined;
+
 function loadRecordings(which, reload) {
 	//doGet("dvrlist_"+which, readRecordings);
+	lastRecordingType = which;
 	var start = epgLoaded[which] != undefined ? epgLoaded[which] : 0;
 	var limit = 20;
 	if (reload) {
@@ -765,8 +784,7 @@ function readCurrent(response) {
 		var e = response.entries[i];
 		if (current[e.channelid] == undefined)
 			current[e.channelid] = new Array();
-		var idx = current[e.channelid].length;
-		current[e.channelid][idx] = e;
+		current[e.channelid][e.start] = e;
 	}
 	if (location.hash != undefined && location.hash.startsWith('#_tag_')) {
 		var tag = location.hash.replace("#_tag_", "");
@@ -822,8 +840,6 @@ function readAutomaticRecorderList(response) {
 			html += '<div class="small padleft">'+info+'</div>';
 		html += '</a></li>';
 		divs += getAutomaticRecorderForm(e);
-		if (document.getElementById('ar_'+e.id) != null)
-			document.getElementById('ar_'+e.id).outerHTML = '';
 	}
 	list.innerHTML = html;
 	append(divs);
@@ -860,22 +876,39 @@ function initialLoad() {
 }
 
 function reload(initial) {
-	if (initial || location.hash == '#_home' || location.hash == '' || location.hash == '#_tags')
+	if (initial || location.hash == '#_home' || location.hash == '' || location.hash == undefined)
 		initialLoad();
-	if (location.hash == '#_ar')
-		loadAutomaticRecorderList();
-	if (location.hash == '#_upcoming')
-		loadRecordings('upcoming', true);
-	if (location.hash == '#_finished')
-		loadRecordings('finished', true);
-	if (location.hash == '#_failed')
-		loadRecordings('failed', true);
-	if (location.hash == '#_about')
-		loadAbout();
-	if (location.hash == '#_subscriptions')
-		loadSubscriptions();
-	if (location.hash == '#_adapters')
-		loadAdapters();
+	if (location.hash != undefined) {
+		if (location.hash.startsWith('#_tag'))
+			initialLoad();			
+		if (location.hash.startsWith('#_ar'))
+			loadAutomaticRecorderList();
+		if (location.hash.startsWith('#_channel_')) {
+			var chid = location.hash.replace('#_channel_', '');
+			reloadChannelIdEpg(chid);
+		}
+		if (location.hash.startsWith('#_epg_')) {
+			var panel = document.getElementById(location.hash.replace('#_', ''));
+			if (panel != null) {
+				var channel = panel.getAttribute('channel');
+				reloadChannelEpg(channel);
+			}
+		}
+		if (location.hash.startsWith('#_upcoming'))
+			loadRecordings('upcoming', true);
+		if (location.hash.startsWith('#_finished'))
+			loadRecordings('finished', true);
+		if (location.hash.startsWith('#_failed'))
+			loadRecordings('failed', true);
+		if (location.hash.startsWith('#_rec_') && lastRecordingType != undefined)
+			loadRecordings(lastRecordingType, true);
+		if (location.hash.startsWith('#_about'))
+			loadAbout();
+		if (location.hash.startsWith('#_subscription'))
+			loadSubscriptions();
+		if (location.hash.startsWith('#_adapter'))
+			loadAdapters();
+	}
 }
 
 function init() {
