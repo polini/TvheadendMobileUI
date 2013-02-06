@@ -656,12 +656,9 @@ function readChannels(response) {
 
 function readCancelEntry(response) {
 	if (response.success == 1) {
-		if (response.param != undefined) {
+		if (response.param != undefined)
 			loadRecordings(response.param, true);
-			iui.showPageById(response.param);
-		}
-		else
-			iui.showPageById('home');
+		iui.goBack();
 	}
 	else {
 		alert(l('errorCancellingEntry'));
@@ -670,12 +667,9 @@ function readCancelEntry(response) {
 
 function readDeleteEntry(response) {
 	if (response.success == 1) {
-		if (response.param != undefined) {
+		if (response.param != undefined)
 			loadRecordings(response.param, true);
-			iui.showPageById(response.param);
-		}
-		else
-			iui.showPageById('home');
+		iui.goBack();
 	}
 	else {
 		alert(l('errorDeletingEntry'));
