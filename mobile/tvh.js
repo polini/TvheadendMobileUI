@@ -782,6 +782,7 @@ function newAutomaticRecorder() {
 	add.weekdays = '1,2,3,4,5,6,7';
 	add.enabled = true;
 	add.prio = 'normal';
+	add.approx_time  = '0';
 	return add;
 }
 
