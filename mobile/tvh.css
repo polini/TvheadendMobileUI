@@ -4,6 +4,8 @@ div.row>input[type="text"] {
 
 span.episode {
 	font-style: italic;
+	padding-left:0.5em;
+	color:#999999;
 }
 
 img.pb.left {
