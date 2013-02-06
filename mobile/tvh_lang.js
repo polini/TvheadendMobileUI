@@ -86,7 +86,8 @@ var i18nstrings =
 	'status.File Missing': 'Datei fehlt',
 	'status.Completed OK': 'Korrekt beendet',
 	'status.Time missed': 'Zeit verpasst',
-	'hour.short': ' Std.'
+	'hour.short': ' Std.',
+	'liveTv': 'Live-TV'
 },
 'en':
 {
@@ -167,6 +168,7 @@ var i18nstrings =
 	'reload':'Reload',
 	'desktopSite':'Desktop-Site',
 	'episode': 'Episode',
-	'hour.short': 'h'
+	'hour.short': 'h',
+	'liveTv': 'Live-TV'
 }
 };

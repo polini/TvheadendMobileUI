@@ -78,6 +78,11 @@ a.more {
 	background: transparent;
 }
 
+a.live {
+	text-align:center;
+	font-style:italic;
+}
+
 a.inactive {
 	color: #999999;
 }

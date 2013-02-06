@@ -632,6 +632,12 @@ function readChannels(response) {
 		}
 		if (sel[sortNo] == undefined) sel[sortNo] = '';
 		app += '<ul id="channel_'+e.chid+'" title="'+e.name+'"><li>'+l('loading')+'</li></ul>';
+		app += '<form class="panel" id="live_'+e.chid+'" title="'+e.name+'">';
+		var streamUrl = window.location.protocol+'//'+window.location.host+'/stream/channelid/'+e.chid;
+		app += '<h1>'+l('liveTv')+'</h1><p>'+streamUrl+'</p>';
+		app += '<a target="_blank" href="'+streamUrl+'" class="whiteButton">'+streamUrl+'</a>';
+		app += '<a target="_blank" href="buzzplayer://'+streamUrl+'" class="whiteButton">Buzzplayer</a>';
+		app += '</form>';
 		sel[sortNo] += '<li><a href="javascript:null;" code="'+e.name+'" onclick="selectItem(\'channel\',this);">'+e.name+'</a></li>';
 	}
 	for (var i in tagHtml) {
@@ -724,6 +730,9 @@ function readEpg(response) {
 		var ch = document.getElementById('channel_'+chid);
 		if (chid == 's')
 			ch = document.getElementById('search');
+		else if (ch.childNodes.length == 1) {
+			html = '<li><a href="#live_'+chid+'" class="live">'+icon('../icons/control_play.png')+l('liveTv')+'</a></li>' + html;
+		}
 		ch.childNodes[ch.childNodes.length-1].outerHTML = '';
 		ch.innerHTML += html;
 		append(ins);
@@ -748,7 +757,7 @@ function loadEpg(chid, chname, reload) {
 		if (limit == 0) limit = 20;
 		var ch = document.getElementById('channel_'+chid);
 		ch.innerHTML = '<li>'+l('loading')+'</li>';
-		lastEpgDay[chid] = '';
+		lastEpgDay[chid] = undefined;
 	}
 	var params = 'start='+start+'&limit='+limit+'&channel='+chname;
 	if (chid == 's')
@@ -764,6 +773,10 @@ function readCurrent(response) {
 			current[e.channelid] = new Array();
 		var idx = current[e.channelid].length;
 		current[e.channelid][idx] = e;
+	}
+	if (location.hash != undefined && location.hash.startsWith('#_tag_')) {
+		var tag = location.hash.replace("#_tag_", "");
+		showChannelInfos(tag);
 	}
 }
 
@@ -899,8 +912,6 @@ function init() {
 	app += '<ul id="adapters" title="'+l('adapters')+'"><li>'+l('loading')+'</li></ul>';
 	app += '<ul id="about" title="'+l('about')+'"><li>'+l('loading')+'</li></ul>';
 	app += '<ul id="search" title="'+l('search')+'"><li>'+l('loading')+'</li></ul>';
-	app += '<ul id="tags" title="'+l('tags')+'"><li>'+l('loading')+'</li></ul>';
-	app += '<ul id="tags" title="'+l('tags')+'"><li>'+l('loading')+'</li></ul>';
 	app += '<ul id="tagSelector" class="selector" title="'+l('tag')+'"><li>'+l('loading')+'</li></ul>';
 	app += '<ul id="genreSelector" class="selector" title="'+l('genre')+'"><li>'+l('loading')+'</li></ul>';
 	app += '<ul id="prioritySelector" class="selector" title="'+l('priority')+'">';
