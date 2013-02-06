@@ -45,7 +45,7 @@ function showSelector(type, input) {
 	iui.showPageById(type+'Selector');
 	setTimeout(function() { if (selectedLink)selectedLink.scrollIntoView(); }, 600);
 }
-function selectItem2(type, a) {
+function selectItem(type, a) {
 	a.parentNode.className = 'selected';
 	if (activeInput[type].getAttribute('code') != undefined) {
 		activeInput[type].setAttribute('code', a.getAttribute('code'));
@@ -105,6 +105,30 @@ function getDuration(seconds) {
 	var h = Math.round((minutes-m) / 60);
 	var mt = (m < 10 ? '0' : '') + m;
 	return h + ':' + mt;
+}
+
+function setProgressBar(elem, width, percent) {
+	elem.innerHTML = getProgressBar(width, percent);
+}
+
+function getProgressBar(width, percent) {
+	percent = (percent < 0) ? 0 : (percent > 100 ? 100 : percent);
+	var left = Math.round(percent/100*width);
+	var right = width-left;
+	var middle = true;
+	if (left < 2) {
+		left+=2;
+		middle = false;
+	}
+	if (right < 2) {
+		right += 2;
+		middle = false;
+	}
+	var html = '<img alt="'+percent+'%" src="images/pb_trans.png" class="pb left" height="10px" width="'+left+'px" />';
+	if (middle)
+		html += '<img alt="'+percent+'%" src="images/pb_middle.png" class="pb" height="10px" width="2px" />';
+	html += '<img alt="'+percent+'%" src="images/pb_trans.png" class="pb right" height="10px" width="'+right+'px" />';
+	return html;
 }
 
 function readSaveAutomaticRecorder(response) {
@@ -178,7 +202,7 @@ function readContentGroups(response) {
 	for (var i=0; i<response.entries.length; i++) {	
 		var e = response.entries[i];
 		window.contentGroups[e.code] = e.name;
-		sel += '<li><a href="javascript:null;" code="'+e.code+'" onclick="selectItem2(\'genre\',this);">'+(e.name?e.name:'&nbsp;')+'</a></li>';
+		sel += '<li><a href="javascript:null;" code="'+e.code+'" onclick="selectItem(\'genre\',this);">'+(e.name?e.name:'&nbsp;')+'</a></li>';
 	}
 	document.getElementById('genreSelector').innerHTML = sel;
 }
@@ -188,7 +212,7 @@ function readConfigs(response) {
 	var sel='';
 	for (i in response.entries) {
 		var e = response.entries[i];
-		sel += '<li><a href="javascript:null;" code="'+e.identifier+'" onclick="selectItem2(\'config\',this);">'+e.name+'</a></li>';
+		sel += '<li><a href="javascript:null;" code="'+e.identifier+'" onclick="selectItem(\'config\',this);">'+e.name+'</a></li>';
 	}
 	document.getElementById('configSelector').innerHTML = sel;
 }
@@ -270,18 +294,18 @@ function doGet(path, callback) {
 
 function readChannelTags(response) {
 	var html = new Array();
-	html[0] = '<li><a href="#tag_0" onclick="showChannelIcons(0);">'+l('allChannels')+'</a></li>';
+	html[0] = '<li><a href="#tag_0" onclick="showChannelInfos(0);">'+l('allChannels')+'</a></li>';
 	var ins = '';
 	ins += '<ul id="tag_0" title="'+l('allChannels')+'"></ul>';
 	var sel = new Array();
-	sel[0] = '<li><a href="javascript:null;" code="" onclick="selectItem2(\'tag\',this);">'+l('any')+'</a></li>';
+	sel[0] = '<li><a href="javascript:null;" code="" onclick="selectItem(\'tag\',this);">'+l('any')+'</a></li>';
 	for (var i=0; i<response.entries.length; i++) {	
 		var e = response.entries[i];
 		window.channelTags[e.id] = e.name;
-		html[e.id] = '<li><a href="#tag_'+e.id+'" onclick="showChannelIcons('+e.id+');">';
+		html[e.id] = '<li><a href="#tag_'+e.id+'" onclick="showChannelInfos('+e.id+');">';
 		html[e.id] += image(e.icon) + e.name+'</a></li>';
 		ins += '<ul id="tag_'+e.id+'" title="'+e.name+'"></ul>';
-		sel[e.id] = '<li><a href="javascript:null;" code="'+e.name+'" onclick="selectItem2(\'tag\',this);">'+e.name+'</a></li>';
+		sel[e.id] = '<li><a href="javascript:null;" code="'+e.name+'" onclick="selectItem(\'tag\',this);">'+e.name+'</a></li>';
 	}
 	var all = '';
 	for (var i in html)
@@ -299,12 +323,14 @@ function getRecordingForm(e, type) {
 	var divs = getIntro(e);
 	divs += '<fieldset>';
 	//divs += textField('title', e.title, true);
+	divs += textField('episode', e.episode, true);
 	divs += textField('channel', e.channel, true);
 	divs += textField('priority', (e.pri != undefined ? l('prio.'+e.pri) : ''), true);
 	divs += textField('start', getDateTimeFromTimestamp(e.start, true), true);
-	divs += textField('duration', getDuration(e.duration), true);
+	divs += textField('duration', getDuration(e.duration)+l('hour.short'), true);
 	divs += textField('config', e.config_name, true);
-	divs += textField('status', e.status, true);
+	var status = l('status.'+e.status)!='status.'+e.status ? l('status.'+e.status) : e.status;
+	divs += textField('status', status, true);
 	divs += '</fieldset>';
 	if (e.schedstate == 'scheduled' || e.schedstate == 'recording')
 		divs += '<a class="redButton" href="javascript:cancelEntry('+e.id+', \''+type+'\');">'+l('cancel')+'</a>';
@@ -377,10 +403,11 @@ function getEpgForm(e) {
 	divs += '<fieldset>';
 	//divs += textField('title', e.title, true);
 	//divs += textField('subtitle', e.subtitle, true);
+	divs += textField('episode', e.episode, true);
 	divs += textField('channel', e.channel, true);
 	//divs += '<div class="row"><label>'+l('description')+'</label><p class="description">' + nvl(e.description) + '</p></div>';
 	divs += textField('start', getDateTimeFromTimestamp(e.start, true), true);
-	divs += textField('duration', getDuration(e.duration)+'h', true);
+	divs += textField('duration', getDuration(e.duration)+l('hour.short'), true);
 	divs += textField('genre', contentGroups[e.contenttype], true);
 	if (e.schedstate != "") {
 		divs += textField('status', contentGroups[e.schedstate], true);
@@ -416,12 +443,36 @@ function readRecordEpg(response) {
 	}
 }
 
-function showChannelIcons(tag) {
+function showChannelInfos(tag) {
 	var as = document.getElementById('tag_'+tag).getElementsByTagName('A');
 	for (var i in as) {
 		if (as[i].tagName != undefined && as[i].tagName.toLowerCase() == 'a') {
-			if (channelIcons[as[i].innerHTML] != undefined)
-				as[i].innerHTML = image(channelIcons[as[i].innerHTML]) + as[i].innerHTML;
+			var chid = as[i].getAttribute('href').replace("#channel_", "");
+			var imgs = as[i].getElementsByClassName('icon');
+			if (imgs.length > 0 && channelIcons[chid] != undefined && imgs[0].src != channelIcons[chid]) {
+				imgs[0].src = channelIcons[chid];
+			}
+			var curr = as[i].getElementsByClassName('small');
+			if (curr.length > 0) {
+				var html = '';
+				if (current[chid] != undefined) {
+					for (var i in current[chid]) {
+						var e = current[chid][i];
+						if (new Date() > new Date(e.start*1000) && new Date() <= new Date((e.start+e.duration)*1000)) {				
+							var percent = Math.round((((new Date()).getTime()/1000)-e.start)/(e.duration)*100);
+							html += getTimeFromTimestamp(e.start);
+							html += getProgressBar(200, percent);
+							html += getTimeFromTimestamp(e.start+e.duration)
+							html += '<br /><b>'+e.title;
+							if (e.episode)
+								html += '<span class="epsiode">'+e.episode+'</span>';
+							html += '</b>';
+							html += (e.subtitle!=undefined&&e.title!=e.subtitle?'<br />'+e.subtitle:'');
+						}
+					}
+				}
+				curr[0].innerHTML = html;
+			}
 		}
 	}
 }
@@ -499,13 +550,16 @@ function readRecordings(response) {
 	var divs = '';
 	for (var i in response.entries) {	
 		var e = response.entries[i];
-		var info = getDateTimeFromTimestamp(e.start, true) + ' (' + getDuration(e.duration) + 'h) &mdash; '+plusMinus(e.pri)+' '+e.channel;
+		var info = getDateTimeFromTimestamp(e.start, true) + ' (' + getDuration(e.duration) + l('hour.short')+') &mdash; '+plusMinus(e.pri)+' '+e.channel;
 		html += '<li><a href="#rec_' + e.id + '">';
 		if (e.schedstate == 'recording')
 			html += icon('../icons/rec.png', '(recording)');
 		if (e.schedstate == 'scheduled')
 			html += icon('../icons/clock.png', '(scheduled)');
-		html += e.title+'<div class="small">'+info+'</div></a></li>';
+		html += e.title;
+		if (nvl(e.episode) != '')
+			epg += '<span class="episode">'+e.episode+'</span>';
+		html += '<div class="small">'+info+'</div></a></li>';
 		divs += getRecordingForm(e, which);
 	}
 	if (response.totalCount > epgLoaded[which])
@@ -534,6 +588,13 @@ function loadRecordings(which, reload) {
 	doGet("dvrlist_"+which+'?'+params, readRecordings);
 }
 
+function imageClass(url, id) {
+	if (url)
+		return '<img class="'+id+'" src="'+url+'" align="top" width="35px" />';
+	else
+		return '';
+}
+
 function image(url) {
 	if (url)
 		return '<img src="'+url+'" align="top" width="35px" />';
@@ -551,15 +612,15 @@ function icon(path) {
 function readChannels(response) {
 	window.channels = response.entries;
 	var sel = new Array();
-	sel[0] = '<li><a href="javascript:null;" code="" onclick="selectItem2(\'channel\',this);">'+l('any')+'</a></li>';
+	sel[0] = '<li><a href="javascript:null;" code="" onclick="selectItem(\'channel\',this);">'+l('any')+'</a></li>';
 	var app = '';
 	var tagHtml = new Array();
 	for (var i in response.entries) {
 		var e = response.entries[i];
 		var no = e.number != undefined ? '<span class="chno round">'+e.number+'</span>' : '';
-		window.channelIcons[no+e.name] = e.ch_icon;
+		window.channelIcons[e.chid] = e.ch_icon;
 		html = '<li><a href="#channel_' + e.chid + '" onclick="loadEpg('+e.chid+', \''+e.name+'\', true);">';
-		html += /*image(e.ch_icon) + */no + e.name + '</a></li>';
+		html += imageClass('images/pb_trans.png', 'icon') + no + e.name + '<div class="small"></div></a></li>';
 		var sortNo = e.number!=undefined?e.number:9999;
 		var tags = ("0,"+e.tags).split(",");
 		for (var j in tags) {
@@ -571,7 +632,7 @@ function readChannels(response) {
 		}
 		if (sel[sortNo] == undefined) sel[sortNo] = '';
 		app += '<ul id="channel_'+e.chid+'" title="'+e.name+'"><li>'+l('loading')+'</li></ul>';
-		sel[sortNo] += '<li><a href="javascript:null;" code="'+e.name+'" onclick="selectItem2(\'channel\',this);">'+e.name+'</a></li>';
+		sel[sortNo] += '<li><a href="javascript:null;" code="'+e.name+'" onclick="selectItem(\'channel\',this);">'+e.name+'</a></li>';
 	}
 	for (var i in tagHtml) {
 		var tagch = '';
@@ -584,6 +645,7 @@ function readChannels(response) {
 		sels += sel[i];
 	append(app);
 	document.getElementById('channelSelector').innerHTML = sels;
+	loadCurrent();
 }
 
 function readCancelEntry(response) {
@@ -645,7 +707,10 @@ function readEpg(response) {
 				epg += icon('../icons/television.png', '(completed)');
 			else if (e.schedstate == 'recordingError' || e.schedstate == 'completedError')
 				epg += icon('../icons/exclamation.png', '(error)');
-			epg += e.title + '<div class="small">' + getTimeFromTimestamp(e.start);
+			epg += e.title;
+			if (nvl(e.episode) != '')
+				epg += '<span class="episode">'+e.episode+'</span>';
+			epg += '<div class="small">' + getTimeFromTimestamp(e.start);
 			if (chid == 's')
 				epg += ' &mdash; ' + e.channel;
 			if (e.subtitle)
@@ -690,6 +755,22 @@ function loadEpg(chid, chname, reload) {
 		params = 'start='+start+'&limit='+limit+'&title='+lastSearch;
 	epgLoaded[chid] = start+limit;
 	doPostWithParam("epg", readEpg, params, chid);
+}
+
+function readCurrent(response) {
+	for (var i in response.entries) {
+		var e = response.entries[i];
+		if (current[e.channelid] == undefined)
+			current[e.channelid] = new Array();
+		var idx = current[e.channelid].length;
+		current[e.channelid][idx] = e;
+	}
+}
+
+var current = new Array();
+
+function loadCurrent() {
+	doPost("epg", readCurrent, "start=0&limit="+(channels.length*2));
 }
 
 function newAutomaticRecorder() {
@@ -823,18 +904,18 @@ function init() {
 	app += '<ul id="genreSelector" class="selector" title="'+l('genre')+'"><li>'+l('loading')+'</li></ul>';
 	app += '<ul id="prioritySelector" class="selector" title="'+l('priority')+'">';
 	for (i in priorities) {
-		app += '<li><a href="javascript:null;" code="'+priorities[i]+'" onclick="selectItem2(\'priority\',this);">'+l('prio.'+priorities[i])+'</li>';
+		app += '<li><a href="javascript:null;" code="'+priorities[i]+'" onclick="selectItem(\'priority\',this);">'+l('prio.'+priorities[i])+'</li>';
 	}
 	app += '</ul>';
 	app += '<ul id="startingSelector" class="selector" title="'+l('startingAround')+'">';
-	app += '<li><a code="0" href="javascript:null;" onclick="selectItem2(\'starting\',this);">'+l('any')+'</a></li>';
+	app += '<li><a code="0" href="javascript:null;" onclick="selectItem(\'starting\',this);">'+l('any')+'</a></li>';
 	for (var h=0; h<24; h++) {
 		for (var m=0; m<60; m+=10) {
 			var ms = h*60 + m;
 			var ht = (h < 10 ? '0' : '') + h;
 			var mt = (m < 10 ? '0' : '') + m;
 			var t = ht + ':' + mt;
-			app += '<li><a code="'+ms+'" href="javascript:null;" onclick="selectItem2(\'starting\',this);">'+t+'</a></li>';
+			app += '<li><a code="'+ms+'" href="javascript:null;" onclick="selectItem(\'starting\',this);">'+t+'</a></li>';
 			//divs += '<option value="'+ms+'"'+selected+'>'+ t + '</option>';
 		}
 	}

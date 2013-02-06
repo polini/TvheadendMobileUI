@@ -76,7 +76,17 @@ var i18nstrings =
 	'muxes':'Muxes',
 	'signal':'Signal',
 	'reload':'Neu laden',
-	'desktopSite':'Desktop-Version'
+	'desktopSite':'Desktop-Version',
+	'episode': 'Episode',
+	'status.Scheduled for recording': 'Aufnahme geplant',
+	'status.Waiting for program start': 'Warten auf Programmstart',
+	'status.Running': 'Läuft',
+	'status.Commercial break': 'Werbepause',
+	'status.Invalid': 'Ungültig',
+	'status.File Missing': 'Datei fehlt',
+	'status.Completed OK': 'Korrekt beendet',
+	'status.Time missed': 'Zeit verpasst',
+	'hour.short': ' Std.'
 },
 'en':
 {
@@ -155,6 +165,8 @@ var i18nstrings =
 	'muxes':'Muxes',
 	'signal':'Signal',
 	'reload':'Reload',
-	'desktopSite':'Desktop-Site'
+	'desktopSite':'Desktop-Site',
+	'episode': 'Episode',
+	'hour.short': 'h'
 }
 };
