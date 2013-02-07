@@ -786,7 +786,7 @@ function readCurrent(response) {
 			current[e.channelid] = new Array();
 		current[e.channelid][e.start] = e;
 	}
-	if (location.hash != undefined && location.hash.startsWith('#_tag_')) {
+	if (location.hash != undefined && location.hash.indexOf('#_tag_') == 0) {
 		var tag = location.hash.replace("#_tag_", "");
 		showChannelInfos(tag);
 	}
@@ -879,34 +879,34 @@ function reload(initial) {
 	if (initial || location.hash == '#_home' || location.hash == '' || location.hash == undefined)
 		initialLoad();
 	if (location.hash != undefined) {
-		if (location.hash.startsWith('#_tag'))
+		if (location.hash.indexOf('#_tag') == 0)
 			initialLoad();			
-		if (location.hash.startsWith('#_ar'))
+		if (location.hash.indexOf('#_ar') == 0)
 			loadAutomaticRecorderList();
-		if (location.hash.startsWith('#_channel_')) {
+		if (location.hash.indexOf('#_channel_') == 0) {
 			var chid = location.hash.replace('#_channel_', '');
 			reloadChannelIdEpg(chid);
 		}
-		if (location.hash.startsWith('#_epg_')) {
+		if (location.hash.indexOf('#_epg_') == 0) {
 			var panel = document.getElementById(location.hash.replace('#_', ''));
 			if (panel != null) {
 				var channel = panel.getAttribute('channel');
 				reloadChannelEpg(channel);
 			}
 		}
-		if (location.hash.startsWith('#_upcoming'))
+		if (location.hash.indexOf('#_upcoming') == 0)
 			loadRecordings('upcoming', true);
-		if (location.hash.startsWith('#_finished'))
+		if (location.hash.indexOf('#_finished') == 0)
 			loadRecordings('finished', true);
-		if (location.hash.startsWith('#_failed'))
+		if (location.hash.indexOf('#_failed') == 0)
 			loadRecordings('failed', true);
-		if (location.hash.startsWith('#_rec_') && lastRecordingType != undefined)
+		if (location.hash.indexOf('#_rec_') == 0 && lastRecordingType != undefined)
 			loadRecordings(lastRecordingType, true);
-		if (location.hash.startsWith('#_about'))
+		if (location.hash.indexOf('#_about') == 0)
 			loadAbout();
-		if (location.hash.startsWith('#_subscription'))
+		if (location.hash.indexOf('#_subscription') == 0)
 			loadSubscriptions();
-		if (location.hash.startsWith('#_adapter'))
+		if (location.hash.indexOf('#_adapter') == 0)
 			loadAdapters();
 	}
 }
