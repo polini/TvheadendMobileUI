@@ -459,7 +459,7 @@ function showChannelInfos(tag) {
 							var percent = Math.round((((new Date()).getTime()/1000)-e.start)/(e.duration)*100);
 							html += getTimeFromTimestamp(e.start);
 							html += getProgressBar(200, percent);
-							html += getTimeFromTimestamp(e.start+e.duration)
+							html += getTimeFromTimestamp(e.start+e.duration);
 							html += '<br /><b>'+e.title;
 							if (e.episode)
 								html += '<span class="epsiode">'+e.episode+'</span>';
