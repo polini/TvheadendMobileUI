@@ -50,7 +50,7 @@ function selectItem(type, a) {
 	if (activeInput[type].getAttribute('code') != undefined) {
 		activeInput[type].setAttribute('code', a.getAttribute('code'));
 	}
-	activeInput[type].value = a.innerText;
+	activeInput[type].value = document.all ? a.innerText : a.textContent;
 	iui.goBack();
 }
 
@@ -206,7 +206,7 @@ function readContentGroups(response) {
 	for (var i=0; i<response.entries.length; i++) {	
 		var e = response.entries[i];
 		window.contentGroups[e.code] = e.name;
-		sel += '<li><a href="javascript:null;" code="'+e.code+'" onclick="selectItem(\'genre\',this);">'+(e.name?e.name:'&nbsp;')+'</a></li>';
+		sel += '<li><a href="javascript:" code="'+e.code+'" onclick="selectItem(\'genre\',this);">'+(e.name?e.name:'&nbsp;')+'</a></li>';
 	}
 	document.getElementById('genreSelector').innerHTML = sel;
 }
@@ -216,7 +216,7 @@ function readConfigs(response) {
 	var sel='';
 	for (i in response.entries) {
 		var e = response.entries[i];
-		sel += '<li><a href="javascript:null;" code="'+e.identifier+'" onclick="selectItem(\'config\',this);">'+e.name+'</a></li>';
+		sel += '<li><a href="javascript:" code="'+e.identifier+'" onclick="selectItem(\'config\',this);">'+e.name+'</a></li>';
 	}
 	document.getElementById('configSelector').innerHTML = sel;
 }
@@ -302,14 +302,14 @@ function readChannelTags(response) {
 	var ins = '';
 	ins += '<ul id="tag_0" title="'+l('allChannels')+'"></ul>';
 	var sel = new Array();
-	sel[0] = '<li><a href="javascript:null;" code="" onclick="selectItem(\'tag\',this);">'+l('any')+'</a></li>';
+	sel[0] = '<li><a href="javascript:" code="" onclick="selectItem(\'tag\',this);">'+l('any')+'</a></li>';
 	for (var i=0; i<response.entries.length; i++) {	
 		var e = response.entries[i];
 		window.channelTags[e.id] = e.name;
 		html[e.id] = '<li><a href="#tag_'+e.id+'" onclick="showChannelInfos('+e.id+');">';
 		html[e.id] += image(e.icon) + e.name+'</a></li>';
 		ins += '<ul id="tag_'+e.id+'" title="'+e.name+'"></ul>';
-		sel[e.id] = '<li><a href="javascript:null;" code="'+e.name+'" onclick="selectItem(\'tag\',this);">'+e.name+'</a></li>';
+		sel[e.id] = '<li><a href="javascript:" code="'+e.name+'" onclick="selectItem(\'tag\',this);">'+e.name+'</a></li>';
 	}
 	var all = '';
 	for (var i in html)
@@ -326,7 +326,6 @@ function readChannelTags(response) {
 function getRecordingForm(e, type) {
 	var divs = getIntro(e);
 	divs += '<fieldset>';
-	//divs += textField('title', e.title, true);
 	divs += textField('episode', e.episode, true);
 	divs += textField('channel', e.channel, true);
 	divs += textField('priority', (e.pri != undefined ? l('prio.'+e.pri) : ''), true);
@@ -398,18 +397,15 @@ function getIntro(e) {
 	divs += '<h1>'+e.title+'</h1>';
 	if (e.subtitle != undefined)
 		divs += '<h2>'+e.subtitle+'</h2>';
-	divs += '<p class="description">'+e.description+'</p>';
+	divs += '<p class="description">'+nvl(e.description)+'</p>';
 	return divs;
 }
 
 function getEpgForm(e) {
 	var divs = getIntro(e);
 	divs += '<fieldset>';
-	//divs += textField('title', e.title, true);
-	//divs += textField('subtitle', e.subtitle, true);
 	divs += textField('episode', e.episode, true);
 	divs += textField('channel', e.channel, true);
-	//divs += '<div class="row"><label>'+l('description')+'</label><p class="description">' + nvl(e.description) + '</p></div>';
 	divs += textField('start', getDateTimeFromTimestamp(e.start, true), true);
 	divs += textField('duration', getDuration(e.duration)+l('hour.short'), true);
 	divs += textField('genre', contentGroups[e.contenttype], true);
@@ -417,15 +413,12 @@ function getEpgForm(e) {
 		divs += textField('status', contentGroups[e.schedstate], true);
 	}
 	divs += '</fieldset>';
-	divs += '<!-- a class="whiteButton" href="javascript:formname.submit()">'+l('save')+'</a>';
-	divs += '<p>&nbsp;</p -->';
 	if (e.schedstate == 'scheduled' || e.schedstate == 'running')
 		divs += '<a class="redButton" href="javascript:cancelEpg('+e.start+',\''+e.channel+'\');">'+l('cancel')+'</a>';
 	else {
 		divs += '<a class="whiteButton" href="javascript:recordEpg('+e.id+',\''+e.channel+'\');">'+l('record')+'</a>';
 		divs += '<fieldset>';
 		divs += '<div class="row"><label>'+l('config')+'</label><input type="text" readonly="readonly" code="" name="config" value="" onclick="javascript:showSelector(\'config\',this);" /></div>';
-		//divs += '<div class="row"><label>Priority</label><input type="text" name="priority" value="normal" onclick="javascript:showSelector(\'priority\',this);" /></div>';
 		divs += '</fieldset>';
 	}
 	if (document.getElementById('epg_'+e.id) != null) {
@@ -591,7 +584,6 @@ function readRecordings(response) {
 var lastRecordingType = undefined;
 
 function loadRecordings(which, reload) {
-	//doGet("dvrlist_"+which, readRecordings);
 	lastRecordingType = which;
 	var start = epgLoaded[which] != undefined ? epgLoaded[which] : 0;
 	var limit = 20;
@@ -631,7 +623,7 @@ function icon(path) {
 function readChannels(response) {
 	window.channels = response.entries;
 	var sel = new Array();
-	sel[0] = '<li><a href="javascript:null;" code="" onclick="selectItem(\'channel\',this);">'+l('any')+'</a></li>';
+	sel[0] = '<li><a href="javascript:" code="" onclick="selectItem(\'channel\',this);">'+l('any')+'</a></li>';
 	var app = '';
 	var tagHtml = new Array();
 	for (var i in response.entries) {
@@ -657,7 +649,7 @@ function readChannels(response) {
 		app += '<a target="_blank" href="'+streamUrl+'" class="whiteButton">'+streamUrl+'</a>';
 		app += '<a target="_blank" href="buzzplayer://'+streamUrl+'" class="whiteButton">Buzzplayer</a>';
 		app += '</form>';
-		sel[sortNo] += '<li><a href="javascript:null;" code="'+e.name+'" onclick="selectItem(\'channel\',this);">'+e.name+'</a></li>';
+		sel[sortNo] += '<li><a href="javascript:" code="'+e.name+'" onclick="selectItem(\'channel\',this);">'+e.name+'</a></li>';
 	}
 	for (var i in tagHtml) {
 		var tagch = '';
@@ -761,7 +753,6 @@ function readEpg(response) {
 var epgLoaded = new Array();
 var lastEpgDay = new Array();
 function loadEpg(chid, chname, reload) {
-	//var start = document.getElementById('channel_'+chid).childNodes.length - 1;
 	var start = epgLoaded[chid] != undefined ? epgLoaded[chid] : 0;
 	var limit = 20;
 	if (reload) {
@@ -943,19 +934,18 @@ function init() {
 	app += '<ul id="genreSelector" class="selector" title="'+l('genre')+'"><li>'+l('loading')+'</li></ul>';
 	app += '<ul id="prioritySelector" class="selector" title="'+l('priority')+'">';
 	for (i in priorities) {
-		app += '<li><a href="javascript:null;" code="'+priorities[i]+'" onclick="selectItem(\'priority\',this);">'+l('prio.'+priorities[i])+'</li>';
+		app += '<li><a href="javascript:" code="'+priorities[i]+'" onclick="selectItem(\'priority\',this);">'+l('prio.'+priorities[i])+'</li>';
 	}
 	app += '</ul>';
 	app += '<ul id="startingSelector" class="selector" title="'+l('startingAround')+'">';
-	app += '<li><a code="0" href="javascript:null;" onclick="selectItem(\'starting\',this);">'+l('any')+'</a></li>';
+	app += '<li><a code="0" href="javascript:" onclick="selectItem(\'starting\',this);">'+l('any')+'</a></li>';
 	for (var h=0; h<24; h++) {
 		for (var m=0; m<60; m+=10) {
 			var ms = h*60 + m;
 			var ht = (h < 10 ? '0' : '') + h;
 			var mt = (m < 10 ? '0' : '') + m;
 			var t = ht + ':' + mt;
-			app += '<li><a code="'+ms+'" href="javascript:null;" onclick="selectItem(\'starting\',this);">'+t+'</a></li>';
-			//divs += '<option value="'+ms+'"'+selected+'>'+ t + '</option>';
+			app += '<li><a code="'+ms+'" href="javascript:" onclick="selectItem(\'starting\',this);">'+t+'</a></li>';
 		}
 	}
 	app += '</ul>';
