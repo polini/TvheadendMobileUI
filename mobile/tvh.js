@@ -570,7 +570,7 @@ function readRecordings(response) {
 			html += icon('../icons/clock.png', '(scheduled)');
 		html += e.title;
 		if (nvl(e.episode) != '')
-			epg += '<span class="episode">'+e.episode+'</span>';
+			html += '<span class="episode">'+e.episode+'</span>';
 		html += '<div class="small">'+info+'</div></a></li>';
 		divs += getRecordingForm(e, which);
 	}
