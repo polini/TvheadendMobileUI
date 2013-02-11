@@ -246,7 +246,10 @@ function readAdapters(response) {
 	var app = '';
 	for (var i in response.entries) {	
 		var e = response.entries[i];
-		html += '<li><a href="#adapter_'+e.identifier+'">'+e.name+'<div class="small">'+e.path+' &mdash; '+e.services+' '+l('services')+' &mdash; '+e.muxes+' ' + l('muxes')+'</div></a></li>';
+		html += '<li><a href="#adapter_'+e.identifier+'">'+e.name+'<div class="small">'+e.path+' &mdash; '+e.services+' '+l('services')+' &mdash; '+e.muxes+' ' + l('muxes')+'</div>';
+		if (e.signal != undefined)
+			html += getProgressBar(200, e.signal) + e.signal + '%'; 
+		html += '</a></li>';
 		app += getAdapterForm(e);
 	}
 	document.getElementById('adapters').innerHTML = html;
