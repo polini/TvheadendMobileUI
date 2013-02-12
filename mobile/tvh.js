@@ -465,7 +465,7 @@ function showChannelInfos(tag) {
 							html += getTimeFromTimestamp(e.start+e.duration);
 							html += '<br /><b>'+e.title;
 							if (e.episode)
-								html += '<span class="epsiode">'+e.episode+'</span>';
+								html += '<span class="episode">'+e.episode+'</span>';
 							html += '</b>';
 							html += (e.subtitle!=undefined&&e.title!=e.subtitle?'<br />'+e.subtitle:'');
 							break;
