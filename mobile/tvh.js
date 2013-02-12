@@ -839,7 +839,7 @@ function readAutomaticRecorderList(response) {
 	append(divs);
 }
 
-function searchEpg() {
+function searchEpg(wait) {
 	var tosearch = document.getElementById('searchText').value;
 	lastSearch = tosearch;
 	var start = epgLoaded['s'] != undefined ? epgLoaded['s'] : 0;
@@ -855,7 +855,10 @@ function searchEpg() {
 	var params = 'start='+start+'&limit='+limit+'&title='+tosearch;
 	epgLoaded['s'] = start+limit;
 	doPostWithParam("epg", readEpg, params, 's');
-	iui.showPageById('search');
+	if (wait)
+		setTimeout(function() {iui.showPageById('search');}, 1000);
+	else
+		iui.showPageById('search');
 }
 
 function loadAutomaticRecorderList() {
@@ -909,8 +912,8 @@ function init() {
 	document.getElementById('reloadButton').innerHTML = l('reload');
 	var ini = '';
 	ini += '<li id="epgGroup" class="group">'+l('electronicProgramGuide')+'</li>';
-	ini += '<li><div><input id="searchText" class="round" type="text" name="search" /></div>';
-	ini += '<div></div><input id="searchButton" type="button" value="'+l('search')+'" onclick="searchEpg();" style="width:99%;" /></div></li>';
+	ini += '<li><form onsubmit="searchEpg(true);return false;"><div><input id="searchText" class="round" type="text" name="search" /></div>';
+	ini += '<div><input id="searchButton" type="button" value="'+l('search')+'" style="width:99%;" onclick="searchEpg();"/></div></form></li>';
 	ini += '<li><a href="#tags">'+icon('../icons/tag_blue.png')+l('tags')+'</a></li>';
 	ini += '<li class="group">'+l('digitalVideoRecorder')+'</li>';
 	ini += '<li><a href="#upcoming" onclick="loadRecordings(\'upcoming\', true);">'+icon('../icons/clock.png','')+l('upcomingRecordings')+'</a></li>';
