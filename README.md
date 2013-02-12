@@ -32,7 +32,17 @@ Have a look at the screenshots in the folder "screenshots"!
 
 ## Installation
 
- - Copy the mobile directory into /usr/local/share/tvheadend/src/webui/static/
+First checkout repository
+
+	$ git clone git://github.com/polini/TvheadendMobileUI.git
+
+Then copy directory
+
+	$ sudo cp -r TvheadendMobileUI/mobile/ /usr/local/share/tvheadend/src/webui/static/
+
+or create symlink
+
+	$ sudo ln -s `pwd`/TvheadendMobileUI/mobile/ /usr/local/share/tvheadend/src/webui/static/mobile
 
 ## Usage
 
@@ -42,3 +52,7 @@ Have a look at the screenshots in the folder "screenshots"!
 
  - This software has beta status, so be careful. I am not responsible for missed or deleted recordings.
  - Please feel free to give feedback or to create issue tickets. 
+
+## License
+
+Licensed under GLPv3 (see LICENSE)
