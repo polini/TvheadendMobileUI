@@ -48,6 +48,8 @@ var layout = layouts['gborri'];
 
 function layoutFormat(e, type) {
 	var ret = layout[type];
+	if (e.title == e.subtitle)
+		e.subtitle = undefined;
 	ret = ret.replace(/%ti/g, nvl(e.title));
 	ret = ret.replace(/%ds_su/g, nvl(e.subtitle) != '' ? ' &mdash; '+e.subtitle : '');
 	ret = ret.replace(/%su/g, nvl(e.subtitle));
@@ -66,7 +68,6 @@ function layoutFormat(e, type) {
 	ret = ret.replace(/%pr/g, plusMinus(e.pri));
 	ret = ret.replace(/%ds/g, ' &mdash; ');
 	ret = ret.replace(/%br/g, '<br />');
-	
 	return ret;
 }
 
