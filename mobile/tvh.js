@@ -10,6 +10,66 @@ var activeInput = new Array();
 var selectedLink = null;
 var channelIcons = new Array();
 
+/**
+ * %ti		title
+ * %su		subtitle
+ * %ds_su	dash with subtitle
+ * %ds		dash
+ * %ep		episode
+ * %ds_ep	dash with episode
+ * %st		start time
+ * %sdt		start date and time
+ * %et		end time
+ * %edt		end date and time
+ * %pb		progress bar
+ * %du		duration
+ * %ch		channel
+ * %pr		priority
+ * %br		break/newline
+ */
+var layouts =
+{'polini':
+	{
+	'current': '%st%pb%et%br<b>%ti</b>%ds_ep%br%su',
+	'epg': '%ti%ds_ep<div class="small">%st%ds_su</div>',
+	'search': '%ti%ep<div class="small">%st%ds%ch%ds_su</div>',
+	'dvr': '%ti%ds_ep<div class="small">%sdt (%du)%ds_su%ds%pr%ch</div>',
+	},
+'gborri':
+{
+	'current': '%st%pb%et%br<b>%ti</b>%ds_su%br%ep',
+	'epg': '%ti%ds_su<div class="small">%st%ds_ep</div>',
+	'search': '%ti%ds_su<div class="small">%st%ds%ch%ds_ep</div>',
+	'dvr': '%ti%ds_su<div class="small">%sdt (%du)%ds_ep%ds%pr%ch</div>',
+	}
+};
+
+var layout = layouts['gborri']; 
+
+function layoutFormat(e, type) {
+	var ret = layout[type];
+	ret = ret.replace(/%ti/g, nvl(e.title));
+	ret = ret.replace(/%ds_su/g, nvl(e.subtitle) != '' ? ' &mdash; '+e.subtitle : '');
+	ret = ret.replace(/%su/g, nvl(e.subtitle));
+	ret = ret.replace(/%ch/g, nvl(e.channel));
+	ret = ret.replace(/%ds_ep/g, nvl(e.episode) != '' ? ' &mdash; '+e.episode : '');
+	ret = ret.replace(/%ep/g, nvl(e.episode));
+	var percent = 0;
+	if (e.duration > 0)
+		percent = Math.round((((new Date()).getTime()/1000)-e.start)/(e.duration)*100);
+	ret = ret.replace(/%pb/g, getProgressBar(200, percent));
+	ret = ret.replace(/%st/g, getTimeFromTimestamp(e.start));
+	ret = ret.replace(/%sdt/g, getDateTimeFromTimestamp(e.start, true));
+	ret = ret.replace(/%et/g, getTimeFromTimestamp(e.end));
+	ret = ret.replace(/%edt/g, getDateTimeFromTimestamp(e.end, true));
+	ret = ret.replace(/%du/g, getDuration(e.duration)+l('hour.short'));
+	ret = ret.replace(/%pr/g, plusMinus(e.pri));
+	ret = ret.replace(/%ds/g, ' &mdash; ');
+	ret = ret.replace(/%br/g, '<br />');
+	
+	return ret;
+}
+
 function l(key) {
 	var fallback = 'en';
 	var lang = navigator.language.substring(0,2);
@@ -458,16 +518,8 @@ function showChannelInfos(tag) {
 				if (current[chid] != undefined) {
 					for (var i in current[chid]) {
 						var e = current[chid][i];
-						if (new Date() > new Date(e.start*1000) && new Date() <= new Date((e.start+e.duration)*1000)) {				
-							var percent = Math.round((((new Date()).getTime()/1000)-e.start)/(e.duration)*100);
-							html += getTimeFromTimestamp(e.start);
-							html += getProgressBar(200, percent);
-							html += getTimeFromTimestamp(e.start+e.duration);
-							html += '<br /><b>'+e.title;
-							if (e.episode)
-								html += '<span class="episode">'+e.episode+'</span>';
-							html += '</b>';
-							html += (e.subtitle!=undefined&&e.title!=e.subtitle?'<br />'+e.subtitle:'');
+						if (new Date() > new Date(e.start*1000) && new Date() <= new Date((e.start+e.duration)*1000)) {
+							html += layoutFormat(e, 'current');
 							break;
 						}
 					}
@@ -562,16 +614,12 @@ function readRecordings(response) {
 	var divs = '';
 	for (var i in response.entries) {	
 		var e = response.entries[i];
-		var info = getDateTimeFromTimestamp(e.start, true) + ' (' + getDuration(e.duration) + l('hour.short')+') &mdash; '+plusMinus(e.pri)+' '+e.channel;
 		html += '<li><a href="#rec_' + e.id + '">';
 		if (e.schedstate == 'recording')
 			html += icon('../icons/rec.png', '(recording)');
 		if (e.schedstate == 'scheduled')
 			html += icon('../icons/clock.png', '(scheduled)');
-		html += e.title;
-		if (nvl(e.episode) != '')
-			html += '<span class="episode">'+e.episode+'</span>';
-		html += '<div class="small">'+info+'</div></a></li>';
+		html += layoutFormat(e, 'dvr');
 		divs += getRecordingForm(e, which);
 	}
 	if (response.totalCount > epgLoaded[which])
@@ -721,15 +769,7 @@ function readEpg(response) {
 				epg += icon('../icons/television.png', '(completed)');
 			else if (e.schedstate == 'recordingError' || e.schedstate == 'completedError')
 				epg += icon('../icons/exclamation.png', '(error)');
-			epg += e.title;
-			if (nvl(e.episode) != '')
-				epg += '<span class="episode">'+e.episode+'</span>';
-			epg += '<div class="small">' + getTimeFromTimestamp(e.start);
-			if (chid == 's')
-				epg += ' &mdash; ' + e.channel;
-			if (e.subtitle)
-				epg += ' &mdash; ' + e.subtitle;
-			epg += '</div>';
+			epg += layoutFormat(e, chid == 's' ? 'search' : 'epg');
 			html += '<li><a href="#epg_'+e.id+'">' + epg + '</a></li>';
 			ins += getEpgForm(e);
 		}
