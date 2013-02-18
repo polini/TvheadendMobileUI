@@ -88,7 +88,8 @@ var i18nstrings =
 	'status.Time missed': 'Zeit verpasst',
 	'hour.short': ' Std.',
 	'liveTv': 'Live-TV',
-	'timeline': 'Zeitleiste'
+	'timeline': 'Zeitleiste',
+	'imdbSearch': 'IMDB-Suche'
 },
 'en':
 {
@@ -171,6 +172,7 @@ var i18nstrings =
 	'episode': 'Episode',
 	'hour.short': 'h',
 	'liveTv': 'Live-TV',
-	'timeline': 'Timeline'
+	'timeline': 'Timeline',
+	'imdbSearch': 'Search IMDB'
 }
 };
