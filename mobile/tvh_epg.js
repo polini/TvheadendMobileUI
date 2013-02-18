@@ -2,17 +2,21 @@ var maxHeight = 0;
 var lh=50;
 var channelToY = new Array();
 var last = '';
+var lastChannel = '';
 var lastEpgX;
 var limit = 400;
 var start = 0;
 var gap = 4;
 var contentGroups = new Array();
+var selectedTag = 0;
+var channelTags = new Array();
 var nullTime = new Date().getTime()/1000;
 var scaleDown = 10;
 var leftPadding = 150;
 var epgLoaded = 0;
 var configs;
 var configSelect;
+var tagSelect;
 var cancelRecordingId;
 var cancelRecordingStart;
 var cancelRecordingChannel;
@@ -30,7 +34,7 @@ colors[16*9] = '#BDC6DE';
 colors[16*10] = '#FFC6A5';
 
 function loadEpg(chid, chname, reload) {
-	doPost("epg", readEpg, 'start='+start+'&limit='+limit+'&');
+	doPost("epg", readEpg, 'start='+start+'&limit='+limit+'&tag='+channelTags[selectedTag]);
 }
 
 function scrollHandler(event) {
@@ -43,6 +47,22 @@ function scrollHandler(event) {
 }
 
 window.onscroll = scrollHandler;
+
+function showChannel(id) {
+	if (document.getElementById('c_'+lastChannel) != null) {
+		document.getElementById('c_'+lastChannel).style.display = 'none';
+		document.getElementById('i_'+lastChannel).style.zIndex = '6';
+	}
+	if (lastChannel != id) {
+		lastChannel = id;
+		var div = document.getElementById('c_'+id);
+		div.style.display = 'block';
+		document.getElementById('i_'+lastChannel).style.zIndex = '8';
+	}
+	else {
+		lastChannel = '';
+	}
+}
 
 function show(id) {
 	if (document.getElementById('e_'+last) != null) {
@@ -75,7 +95,8 @@ function readEpg(response) {
 				w+=x;
 				x=0;
 			}
-			last = x > last ? x : last; 
+			last = x > last ? x : last;
+			e.contenttype -= e.contenttype % 16;
 			html += '<div id="e_'+e.id+'" class="box '+e.schedstate+'" style="top:'+y+'px;left:'+x+'px;width:'+w+'px;height:'+lh+'px;background-color:'+colors[e.contenttype]+';">';
 			html += '<div class="head" onclick="show('+e.id+');"><h1>'+e.title+'</h1>';
 			var sub = '';
@@ -84,9 +105,9 @@ function readEpg(response) {
 			if (e.episode != undefined)
 				sub += (sub.length > 0 ? ' &mdash; ' : '') + e.episode;
 			html += '<h2>'+sub+'</h2></div>';
-			html += '<div class="add"><h3 onclick="show('+e.id+');">'+nvl(contentGroups[e.contenttype])+'</h3><p class="desc" onclick="show('+e.id+');">'+nvl(e.description)+'</p>';
+			html += '<div class="add"><img class="poster" /><h3 onclick="show('+e.id+');">'+nvl(contentGroups[e.contenttype])+'</h3><p class="desc" onclick="show('+e.id+');">'+nvl(e.description)+'</p>';
 			html += '<p class="time">' + getDateTimeFromTimestamp(e.start, true) + '&ndash;' + getTimeFromTimestamp(e.start+e.duration) + ' (' + getDuration(e.duration) + l('hour.short') + ')</p>';
-			html += '<p class="channel">' + e.channel + '</p>';
+			html += '<p class="channel">' + e.channel + ' &mdash; <a href="http://akas.imdb.org/find?q='+e.title+'" target="_blank">'+l('imdbSearch')+'</a></p>';
 			html += '<form class="record">'+configSelect+'<br /><input type="button" value="'+l('record')+'" onclick="record('+e.id+',this);" /></form>';
 			html += '<form class="cancel"><input type="button" value="'+l('cancel')+'" onclick="cancel('+e.id+', \''+e.start+'\',\''+e.channel+'\');" /></form>';
 			html += '</div>';
@@ -158,6 +179,31 @@ function readConfigs(response) {
 		window.configSelect += '<option value="'+e.identifier+'"'+selected+'>'+e.name+'</option>';
 	}
 	window.configSelect += '</select>';
+	loadStandardTable("channeltags", readChannelTags);
+}
+
+function showTag(tag) {
+	window.location.search = '?'+tag;
+}
+
+function readChannelTags(response) {
+	var sel = new Array();
+	sel[0] = '<option value="0">'+l('allChannels')+'</option>';
+	for (var i=0; i<response.entries.length; i++) {	
+		var e = response.entries[i];
+		var selected= '';
+		var tag = window.location.search.replace('?','');
+		if (tag == e.id) {
+			selectedTag = e.id;
+			selected = ' selected="selected"';
+		}
+		window.channelTags[e.id] = e.name;
+		sel[e.id] = '<option value="'+e.id+'"'+selected+'>'+e.name+'</option>';
+	}
+	tagSelect = '<select onchange="showTag(this.value);">';
+	for (var i in sel)
+		tagSelect += sel[i];
+	tagSelect += '</select>';
 	doPost("channels", readChannels, "op=list");
 }
 
@@ -200,14 +246,24 @@ function readChannels(response) {
 	var channels = new Array();
 	for (var i in response.entries) {
 		var e = response.entries[i];
-		var sortNo = e.number!=undefined?e.number:9999;
-		if (channels[sortNo] == undefined) channels[sortNo] = new Array();
-		channels[sortNo][channels[sortNo].length] = e;
+		var tags = ',0,'+e.tags+',';
+		if (tags.indexOf(','+selectedTag+',') >= 0) {
+			var sortNo = e.number!=undefined?e.number:9999;
+			if (channels[sortNo] == undefined) channels[sortNo] = new Array();
+			channels[sortNo][channels[sortNo].length] = e;
+		}
 	}
 	for (var i in channels) {
 		for (var j in channels[i]) {
 			var e = channels[i][j];
-			html += '<img height="'+lh+'px" class="channel" src="'+e.ch_icon+'" alt="'+e.name+'" title="'+e.name+'" style="left:0px;top:'+y+'px;" />';
+			html += '<div id="c_'+e.chid+'" style="left:0px;top:'+y+'px;" class="channelinfo"><h1>'+e.name+'</h1>';
+			var streamUrl = window.location.protocol+'//'+window.location.host+'/stream/channelid/'+e.chid;
+			html += '<h2>'+icon('../icons/control_play.png') + l('liveTv')+'</h2><p>'+streamUrl+'</p>';
+			html += '<p><a target="_blank" href="'+streamUrl+'"><button>HTTP</button></a>';
+			html += '<a target="_blank" href="buzzplayer://'+streamUrl+'"><button>Buzzplayer</button></a></p>';
+			html += '<hr><h2>'+icon('../icons/tag_blue.png') + l('tags') + '</h2><p>' + tagSelect + '</p>';
+			html += '</div>';
+			html += '<img id="i_'+e.chid+'" height="'+lh+'px" onclick="showChannel('+e.chid+');" class="channel" src="'+e.ch_icon+'" alt="'+e.name+'" title="'+e.name+'" style="left:0px;top:'+y+'px;" />';
 			channelToY[e.name] = y;
 			y+=lh+gap;
 			maxHeight = y;

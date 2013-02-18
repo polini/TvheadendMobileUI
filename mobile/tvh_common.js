@@ -86,6 +86,10 @@ function append(html) {
 	document.getElementById('last').outerHTML = html + document.getElementById('last').outerHTML;
 }
 
+function loadStandardTable(table, callback) {
+	doPost("tablemgr", callback, "op=get&table="+table);
+}
+
 function doGet(path, callback) {
 	var http = new XMLHttpRequest();  	
 	http.open("GET", "../../"+path, true);
@@ -100,4 +104,18 @@ function doGet(path, callback) {
 	};
 
 	http.send(null);
+}
+
+function image(url) {
+	if (url)
+		return '<img src="'+url+'" align="top" width="35px" />';
+	else
+		return '';
+}
+
+function icon(path) {
+	if (path)
+		return '<img src="'+path+'" height="16px" width="16px" />';
+	else
+		return '';
 }

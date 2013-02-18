@@ -257,10 +257,6 @@ function readConfigs(response) {
 	document.getElementById('configSelector').innerHTML = sel;
 }
 
-function loadStandardTable(table, callback) {
-	doPost("tablemgr", callback, "op=get&table="+table);
-}
-
 function readSubscriptions(response) {
 	var html = '';
 	var app = '';
@@ -553,20 +549,6 @@ function loadRecordings(which, reload) {
 function imageClass(url, id) {
 	if (url)
 		return '<img class="'+id+'" src="'+url+'" align="top" width="35px" />';
-	else
-		return '';
-}
-
-function image(url) {
-	if (url)
-		return '<img src="'+url+'" align="top" width="35px" />';
-	else
-		return '';
-}
-
-function icon(path) {
-	if (path)
-		return '<img src="'+path+'" height="16px" width="16px" />';
 	else
 		return '';
 }
