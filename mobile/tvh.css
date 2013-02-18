@@ -63,7 +63,7 @@ body>ul>li.group {
 	background-color: #385487;
 }
 
-div.small {
+span.small, div.small {
 	font-size: 12px;
 	font-weight: normal;
 }

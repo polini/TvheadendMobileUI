@@ -1,0 +1,144 @@
+body {
+	background-color: white;
+}
+
+div#logos {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+}
+
+div#timeline {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	height: 12px;
+	font-size: 10px;
+	font-family: Arial;
+	font-weight: normal;
+	z-index: 4;
+}
+
+div#timeline > div {
+	background-color: white;
+	border: 1px solid #999;
+	position: absolute;
+	top: 0px;
+	height: 12px;
+}
+
+div#current {
+	border-left: 1px solid red;
+	top: 0px;
+	position: absolute;
+	left: -1px;
+	height: 0px;
+	z-index: 5;
+}
+
+div.box {
+	position: absolute;
+	background: #ccc url('images/gradient.png') repeat-y right top;
+	border-radius: 5px;
+	font-family: Arial;
+	font-size: 10pt;
+	z-index: 1;
+	overflow: hidden;
+	color: #666;
+	cursor: pointer;
+}
+
+div.box > div.head {
+	height: 50px;
+}
+
+div.box.big > div.head {
+	height: auto;
+}
+
+div.box h1 {
+	margin: 1px 2px;
+	font-size: 12pt;
+	text-shadow: 1px 1px 0px #fff;
+}
+
+div.scheduled h1 {
+	background: url('../icons/clock.png') no-repeat left top;
+	padding-left: 18px;
+}
+
+div.running h1 {
+	background: url('../icons/rec.png') no-repeat left top;
+	padding-left: 18px;
+}
+
+div.box > div.add > form.record > input,
+div.box > div.add > form.record > select,
+div.box > div.add > form.cancel > input
+	{
+	min-width: 200px;
+}
+
+div.box > div.add > form {
+	padding: 5px;
+}
+div.box > div.add > p {
+	padding: 2px;
+}
+
+div.box > div.add > p.channel {
+	text-align: right;
+	font-style: italic;
+}
+
+div.box > div.add > form.cancel {
+	display: none;
+	text-align: center;
+}
+
+div.box > div.add > form.record {
+	text-align: center;
+}
+
+div.scheduled > div.add > form.cancel,
+div.running > div.add > form.cancel {
+	display: block;
+}
+
+div.scheduled > div.add > form.record,
+div.running > div.add > form.record {
+	display: none;
+}
+
+div.box h2 {
+	margin: 1px 2px;
+	font-size: 10pt;
+}
+
+div.box > div.add > h3 {
+	margin: 1px 2px;
+	font-size: 10pt;
+	text-align: right;
+}
+
+div.box.big {
+	height: auto !important;
+	z-index: 10;
+	box-shadow: 3px 3px 5px 6px;
+	min-width: 300px;
+	min-height: 60px;
+}
+
+div.box > div.add {
+	margin-top: 5px;
+	display: none;
+}
+
+div.box.big > div.add {
+	display: block;
+}
+
+img.channel {
+	position: absolute;
+	z-index: 6;
+}

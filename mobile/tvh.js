@@ -1,5 +1,3 @@
-var days = new Array(l('sunday.short'), l('monday.short'), l('tuesday.short'), l('wednesday.short'), l('thursday.short'), l('friday.short'), l('saturday.short'), l('sunday.short') );
-var longdays = new Array(l('sunday'), l('monday'), l('tuesday'), l('wednesday'), l('thursday'), l('friday'), l('saturday'), l('sunday') );
 var priorities = new Array('important', 'high', 'normal', 'low', 'unimportant');
 var plusMinusSigns = new Array('⊕⊕', '⊕', '', '⊖', '⊖⊖');
 var contentGroups = new Array();
@@ -31,7 +29,7 @@ var layouts =
 {'polini':
 	{
 	'current': '%st%pb%et%br<b>%ti</b>%ds_ep%br%su',
-	'epg': '%ti%ds_ep<div class="small">%st%ds_su</div>',
+	'epg': '<span class="small">%st</span> %ti<div class="small">%su</div>',
 	'search': '%ti%ep<div class="small">%st%ds%ch%ds_su</div>',
 	'dvr': '%ti%ds_ep<div class="small">%sdt (%du)%ds_su%ds%pr%ch</div>',
 	},
@@ -44,7 +42,7 @@ var layouts =
 	}
 };
 
-var layout = layouts['gborri']; 
+var layout = layouts['polini']; 
 
 function layoutFormat(e, type) {
 	var ret = layout[type];
@@ -69,17 +67,6 @@ function layoutFormat(e, type) {
 	ret = ret.replace(/%ds/g, ' &mdash; ');
 	ret = ret.replace(/%br/g, '<br />');
 	return ret;
-}
-
-function l(key) {
-	var fallback = 'en';
-	var lang = navigator.language.substring(0,2);
-	if (i18nstrings[lang] != undefined && i18nstrings[lang][key] != undefined)
-		return i18nstrings[lang][key];
-	else if (i18nstrings[fallback][key] != undefined)
-		return i18nstrings[fallback][key];
-	else
-		return key;
 }
 
 function plusMinus(prio) {
@@ -113,10 +100,6 @@ function selectItem(type, a) {
 	}
 	activeInput[type].value = document.all ? a.innerText : a.textContent;
 	iui.goBack();
-}
-
-function nvl(val) {
-	return val != undefined ? val : '';
 }
 
 function getAutomaticRecorderForm(e) {
@@ -162,14 +145,6 @@ function getTimeFromMinutes(minutes) {
 	var ht = (h < 10 ? '0' : '') + h;
 	var mt = (m < 10 ? '0' : '') + m;
 	return ht + ':' + mt;
-}
-
-function getDuration(seconds) {
-	var minutes = seconds/60;
-	var m = Math.round(minutes % 60);
-	var h = Math.round((minutes-m) / 60);
-	var mt = (m < 10 ? '0' : '') + m;
-	return h + ':' + mt;
 }
 
 function setProgressBar(elem, width, percent) {
@@ -286,10 +261,6 @@ function loadStandardTable(table, callback) {
 	doPost("tablemgr", callback, "op=get&table="+table);
 }
 
-function doPost(path, callback, params) {
-	doPostWithParam(path, callback, params, null);
-}
-
 function readSubscriptions(response) {
 	var html = '';
 	var app = '';
@@ -323,41 +294,6 @@ function loadSubscriptions() {
 
 function loadAdapters() {
 	doGet('tv/adapter', readAdapters);
-}
-
-function doPostWithParam(path, callback, params, ownParam) {
-	var http = new XMLHttpRequest();  	
-	http.open("POST", "../../"+path, true);
-	http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-	http.setRequestHeader("Content-length", params.length);
-	http.setRequestHeader("Connection", "close");
-	http.ownParam = ownParam;
-
-	http.onreadystatechange = function() {
-		if(http.readyState == 4 && http.status == 200) {
-			var response = eval("[" + http.responseText + "]");
-			response[0].param = http.ownParam;
-			callback(response[0]);
-		}
-	};
-
-	http.send(params);
-}
-
-function doGet(path, callback) {
-	var http = new XMLHttpRequest();  	
-	http.open("GET", "../../"+path, true);
-	http.path = path;
-
-	http.onreadystatechange = function() {
-		if(http.readyState == 4 && http.status == 200) {
-			var response = eval("[" + http.responseText + "]");
-			response[0].path = http.path;
-			callback(response[0]);
-		}
-	};
-
-	http.send(null);
 }
 
 function readChannelTags(response) {
@@ -567,43 +503,6 @@ function recordEpg(id, channel) {
 	var form = document.getElementById('epg_'+id);
 	var params = 'eventId='+id+'&op=recordEvent&config_name='+form.config.value;
 	doPostWithParam("dvr", readRecordEpg, params, channel);
-}
-
-function append(html) {
-	document.getElementById('last').outerHTML = html + document.getElementById('last').outerHTML;
-}
-
-function getDateTimeFromTimestamp(timestamp, showDay) {
-	var date = new Date(timestamp*1000);
-	return getDate(date, showDay)+' '+getTime(date);
-}
-
-function getDateFromTimestamp(timestamp, showDay) {
-	var date = new Date(timestamp*1000);
-	return getDate(date, showDay);
-}
-
-function getTimeFromTimestamp(timestamp) {
-	var date = new Date(timestamp*1000);
-	return getTime(date);
-}
-
-function z(s){s=''+s;return s.length>1?s:'0'+s;}
-
-function getDate(d, showDay)
-{
-	var day = days[d.getDay()];
-	var y=d.getFullYear(),m=d.getMonth()+1,dd=d.getDate();
-	f=l('dateFormat');
-	f=f.replace(/yyyy/,y);f=f.replace(/yy/,String(y).substr(2));
-	f=f.replace(/MM/,z(m));f=f.replace(/M/,m);
-	f=f.replace(/dd/,z(dd));f=f.replace(/d/,dd);
-	return (showDay?day+' ':'')+f;
-}
-
-function getTime(d)
-{
-	return z(d.getHours())+":"+z(d.getMinutes());
 }
 
 function readRecordings(response) {
@@ -956,6 +855,7 @@ function init() {
 	ini += '<li><form onsubmit="searchEpg(true);return false;"><div><input id="searchText" class="round" type="text" name="search" /></div>';
 	ini += '<div><input id="searchButton" type="button" value="'+l('search')+'" style="width:99%;" onclick="searchEpg();"/></div></form></li>';
 	ini += '<li><a href="#tags">'+icon('../icons/tag_blue.png')+l('tags')+'</a></li>';
+	ini += '<li><a href="epg.html" target="_blank">'+icon('images/timeline.png')+l('timeline')+'</a></li>';
 	ini += '<li class="group">'+l('digitalVideoRecorder')+'</li>';
 	ini += '<li><a href="#upcoming" onclick="loadRecordings(\'upcoming\', true);">'+icon('../icons/clock.png','')+l('upcomingRecordings')+'</a></li>';
 	ini += '<li><a href="#finished" onclick="loadRecordings(\'finished\', true);">'+icon('../icons/television.png','')+l('finishedRecordings')+'</a></li>';

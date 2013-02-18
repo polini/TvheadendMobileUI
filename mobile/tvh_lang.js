@@ -87,7 +87,8 @@ var i18nstrings =
 	'status.Completed OK': 'Korrekt beendet',
 	'status.Time missed': 'Zeit verpasst',
 	'hour.short': ' Std.',
-	'liveTv': 'Live-TV'
+	'liveTv': 'Live-TV',
+	'timeline': 'Zeitleiste'
 },
 'en':
 {
@@ -169,6 +170,7 @@ var i18nstrings =
 	'desktopSite':'Desktop-Site',
 	'episode': 'Episode',
 	'hour.short': 'h',
-	'liveTv': 'Live-TV'
+	'liveTv': 'Live-TV',
+	'timeline': 'Timeline'
 }
 };
