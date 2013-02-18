@@ -30,6 +30,13 @@ Have a look at the screenshots in the folder "screenshots"!
    - English
    - German
 
+## EPG Timeline
+
+ - Also included is a nice EPG timeline (vertical EPG) with the channels on y-axis and time on x-axis. It is possible to schedule and cancel recordings from the timeline. Just click on an entry and you see a detailed entry with buttons.
+
+![ScreenShot](https://raw.github.com/polini/TvheadendMobileUI/master/screenshots/timeline.png)
+
+
 ## Installation
 
 First checkout repository
@@ -47,6 +54,7 @@ or create symlink
 ## Usage
 
  - You can now access the web interface: http://ip:9981/static/mobile/index.html
+ - The EPG timeline can accessed via: http://ip:9981/static/mobile/epg.html
 
 ## Please notice
 
