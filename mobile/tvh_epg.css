@@ -6,6 +6,11 @@ div#logos {
 	position: absolute;
 	left: 0px;
 	top: 0px;
+	background-color: white;
+    box-shadow: 3px 3px 5px #666;
+    -webkit-box-shadow: 3px 3px 5px #666;
+    width: 70px;
+    z-index: 6;
 }
 
 div#timeline {
@@ -21,8 +26,9 @@ div#timeline {
 
 div.channelinfo {
 	position: absolute;
-	z-index: 7;
-	box-shadow: 3px 3px 5px 6px;
+	z-index: 8;
+	box-shadow: 3px 3px 5px #666;
+	-webkit-box-shadow: 3px 3px 5px #666;
 	display: none;
 	min-width: 300px;
 	background-color: white;
@@ -44,6 +50,8 @@ div#timeline > div {
 	position: absolute;
 	top: 0px;
 	height: 12px;
+	box-shadow: 3px 3px 5px #666;
+	-webkit-box-shadow: 3px 3px 5px #666;
 }
 
 div#current {
@@ -55,9 +63,17 @@ div#current {
 	z-index: 5;
 }
 
+p.tmdb {
+	display: none;
+	margin: 0px;
+	text-align: center;
+	padding:5px;
+}
+
 div.box {
 	position: absolute;
 	background: #ccc url('images/gradient.png') repeat-y right top;
+	background-size: 100% auto;
 	border-radius: 5px;
 	font-family: Arial;
 	font-size: 10pt;
@@ -65,6 +81,11 @@ div.box {
 	overflow: hidden;
 	color: #666;
 	cursor: pointer;
+}
+
+div.box.backdrop {
+	background-size: cover;
+	background-position: left top;
 }
 
 div.box > div.head {
@@ -76,7 +97,7 @@ div.box.big > div.head {
 }
 
 div.box h1 {
-	margin: 1px 2px;
+	margin: 0px 2px;
 	font-size: 12pt;
 	text-shadow: 1px 1px 0px #fff;
 }
@@ -90,6 +111,14 @@ div.recording h1 {
 	background: url('../icons/rec.png') no-repeat left top;
 	padding-left: 18px;
 }
+div.poster {
+	float:right;
+}
+div.poster img {
+	box-shadow:3px 3px 5px #666;
+	-webkit-box-shadow:3px 3px 5px #666;
+	margin:2px 10px;
+}
 
 div.box > div.add > form.record > input,
 div.box > div.add > form.record > select,
@@ -98,6 +127,10 @@ div.channelinfo select,
 div.channelinfo button
 	{
 	min-width: 200px;
+}
+
+div.box.backdrop > div {
+	background:url(images/white75.png);
 }
 
 div.box > div.add > form {
@@ -132,7 +165,7 @@ div.recording > div.add > form.record {
 
 div.box h2,
 div.channelinfo h2 {
-	margin: 1px 2px;
+	margin: 0px 2px;
 	font-size: 10pt;
 }
 
@@ -145,13 +178,14 @@ div.box > div.add > h3 {
 div.box.big {
 	height: auto !important;
 	z-index: 10;
-	box-shadow: 3px 3px 5px 6px;
+	box-shadow: 3px 3px 5px #666;
+	-webkit-box-shadow: 3px 3px 5px #666;
 	min-width: 300px;
 	min-height: 60px;
 }
 
 div.box > div.add {
-	margin-top: 5px;
+	padding-top: 5px;
 	display: none;
 }
 
@@ -161,6 +195,10 @@ div.box.big > div.add {
 
 img.channel {
 	position: absolute;
-	z-index: 6;
+	z-index: 7;
 	cursor:pointer;
+    max-height: 50px;
+    max-width: 70px;
+	height: auto;
+    width: auto;
 }

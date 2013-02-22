@@ -1,7 +1,42 @@
 var days = new Array(l('sunday.short'), l('monday.short'), l('tuesday.short'), l('wednesday.short'), l('thursday.short'), l('friday.short'), l('saturday.short'), l('sunday.short') );
 var longdays = new Array(l('sunday'), l('monday'), l('tuesday'), l('wednesday'), l('thursday'), l('friday'), l('saturday'), l('sunday') );
+var tmdbApiKey = '';
 
+/**
+ * %ti		title
+ * %su		subtitle
+ * %ds_su	dash with subtitle
+ * %ds		dash
+ * %ep		episode
+ * %ds_ep	dash with episode
+ * %st		start time
+ * %sdt		start date and time
+ * %et		end time
+ * %edt		end date and time
+ * %pb		progress bar
+ * %du		duration
+ * %ch		channel
+ * %pr		priority
+ * %br		break/newline
+ */
+var layouts =
+{'polini':
+	{
+	'current': '%st%pb%et%br<b>%ti</b>%ds_ep%br%su',
+	'epg': '<span class="small">%st</span> %ti<div class="small">%su</div>',
+	'search': '%ti%ep<div class="small">%st%ds%ch%ds_su</div>',
+	'dvr': '%ti%ds_ep<div class="small">%sdt (%du)%ds_su%ds%pr%ch</div>',
+	},
+'gborri':
+{
+	'current': '%st%pb%et%br<b>%ti</b>%ds_su%br%ep',
+	'epg': '%ti%ds_su<div class="small">%st%ds_ep</div>',
+	'search': '%ti%ds_su<div class="small">%st%ds%ch%ds_ep</div>',
+	'dvr': '%ti%ds_su<div class="small">%sdt (%du)%ds_ep%ds%pr%ch</div>',
+	}
+};
 
+var layout = layouts['gborri']; 
 
 function doPost(path, callback, params) {
 	doPostWithParam(path, callback, params, null);

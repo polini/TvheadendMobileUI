@@ -89,7 +89,8 @@ var i18nstrings =
 	'hour.short': ' Std.',
 	'liveTv': 'Live-TV',
 	'timeline': 'Zeitleiste',
-	'imdbSearch': 'IMDB-Suche'
+	'imdbSearch': 'IMDB-Suche',
+	'tmdbSearch': 'TMDB-Suche',
 },
 'en':
 {
@@ -173,6 +174,8 @@ var i18nstrings =
 	'hour.short': 'h',
 	'liveTv': 'Live-TV',
 	'timeline': 'Timeline',
-	'imdbSearch': 'Search IMDB'
+	'imdbSearch': 'Search IMDB',
+	'tmdbSearch': 'Search TMDB',
+	'tmdbAttribution': 'This product uses the <a href="http://themoviedb.org/" target="_blank">TMDb</a> API but is not endorsed or certified by TMDb.'
 }
 };

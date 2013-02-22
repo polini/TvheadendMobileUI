@@ -1,3 +1,7 @@
+li.noBgImage {
+	background-image: url(images/pb_trans.png);
+}
+
 div.row>input[type="text"] {
 	padding-bottom: 10px !important;
 }
@@ -40,6 +44,7 @@ input#searchText {
 
 span.chno {
 	border: 1px solid #385487;
+	background-color:white;
 	color: #385487;
 	font-size: 12px;
 	vertical-align: middle;

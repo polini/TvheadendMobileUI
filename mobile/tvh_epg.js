@@ -21,6 +21,11 @@ var cancelRecordingId;
 var cancelRecordingStart;
 var cancelRecordingChannel;
 var colors = new Array();
+var loadedPosters = new Array();
+var loadedBackdrops = new Array();
+var posterWidth = 92;
+var backdropWidth = 780;
+var tmdbImgUrl = 'http://d3gtl9l2a4fn1j.cloudfront.net/t/p/w';
 colors[16*0] = '#94D6E7';
 colors[16*1] = '#A5DE94';
 colors[16*2] = '#94D639';
@@ -49,6 +54,9 @@ function scrollHandler(event) {
 window.onscroll = scrollHandler;
 
 function showChannel(id) {
+	if (document.getElementById('e_'+last) != null) {
+		document.getElementById('e_'+last).className = document.getElementById('e_'+last).className.replace('big', '');
+	}
 	if (document.getElementById('c_'+lastChannel) != null) {
 		document.getElementById('c_'+lastChannel).style.display = 'none';
 		document.getElementById('i_'+lastChannel).style.zIndex = '6';
@@ -65,6 +73,10 @@ function showChannel(id) {
 }
 
 function show(id) {
+	if (document.getElementById('c_'+lastChannel) != null) {
+		document.getElementById('c_'+lastChannel).style.display = 'none';
+		document.getElementById('i_'+lastChannel).style.zIndex = '6';
+	}
 	if (document.getElementById('e_'+last) != null) {
 		document.getElementById('e_'+last).className = document.getElementById('e_'+last).className.replace('big', '');
 	}
@@ -72,6 +84,58 @@ function show(id) {
 		last = id;
 		var div = document.getElementById('e_'+id);
 		div.className += ' big';
+		var poster = div.getElementsByClassName('poster');
+		if (poster.length > 0 && poster[0].innerHTML == '' && tmdbApiKey != '') {
+			var title = div.getElementsByTagName('h1')[0].innerHTML;
+			var p = '-';
+			if (loadedPosters[title] != undefined) {
+				p = loadedPosters[title];
+				poster[0].innerHTML = (p!='-') ? '<img width="'+posterWidth+'px" src="'+tmdbImgUrl+posterWidth+p+'" />' : '&nbsp;';
+				if (loadedBackdrops[title] != undefined && loadedBackdrops[title] != '-') {
+					div.style.backgroundImage = 'url('+tmdbImgUrl+backdropWidth+loadedBackdrops[title]+')';
+					div.className += ' backdrop';
+				}
+				var att = div.getElementsByClassName('tmdb');
+				if (att.length > 0) {
+					att[0].style.display = 'block';
+				}
+			}
+			else {
+				var http = new XMLHttpRequest();
+				http.open("GET", 'http://api.themoviedb.org/3/search/movie?api_key='+tmdbApiKey+'&query='+encodeURI(title)+'&language='+navigator.language.substring(0,2));
+				http.send(null);
+				http.title = title;
+				http.div = div;
+				http.poster = poster;
+				http.pw = posterWidth;
+				
+				http.onreadystatechange = function() {
+					if(http.readyState == 4 && http.status == 200) {
+						var response = JSON.parse("[" + http.responseText + "]");
+						var p = '-';
+						var bd = '-';
+						if (response[0].results.length > 0) {
+							p = response[0].results[0].poster_path;
+							if (response[0].results[0].backdrop_path != '')
+								bd = response[0].results[0].backdrop_path;
+						}
+						loadedPosters[http.title] = p;
+						loadedBackdrops[http.title] = bd;
+						http.poster[0].innerHTML = (p!='-') ? '<img width="'+http.pw+'px" src="'+tmdbImgUrl+http.pw+p+'" />' : '&nbsp;';
+						if (bd != '-') {
+							http.div.style.backgroundImage = 'url('+tmdbImgUrl+backdropWidth+bd+')';
+							http.div.className += ' backdrop';
+						}
+						if (p!='-') {
+							var att = http.div.getElementsByClassName('tmdb');
+							if (att.length > 0) {
+								att[0].style.display = 'block';
+							}
+						}
+					}
+				};
+			}
+		}
 	}
 	else {
 		last = '';
@@ -105,11 +169,12 @@ function readEpg(response) {
 			if (e.episode != undefined)
 				sub += (sub.length > 0 ? ' &mdash; ' : '') + e.episode;
 			html += '<h2>'+sub+'</h2></div>';
-			html += '<div class="add"><img class="poster" /><h3 onclick="show('+e.id+');">'+nvl(contentGroups[e.contenttype])+'</h3><p class="desc" onclick="show('+e.id+');">'+nvl(e.description)+'</p>';
+			html += '<div class="add"><div class="poster"></div><h3 onclick="show('+e.id+');">'+nvl(contentGroups[e.contenttype])+'</h3><p class="desc" onclick="show('+e.id+');">'+nvl(e.description)+'</p>';
 			html += '<p class="time">' + getDateTimeFromTimestamp(e.start, true) + '&ndash;' + getTimeFromTimestamp(e.start+e.duration) + ' (' + getDuration(e.duration) + l('hour.short') + ')</p>';
-			html += '<p class="channel">' + e.channel + ' &mdash; <a href="http://akas.imdb.org/find?q='+e.title+'" target="_blank">'+l('imdbSearch')+'</a></p>';
+			html += '<p class="channel">' + e.channel + ' &mdash; <a href="http://akas.imdb.org/find?q='+e.title+'" target="_blank">'+l('imdbSearch')+'</a></p><br clear="all" />';
 			html += '<form class="record">'+configSelect+'<br /><input type="button" value="'+l('record')+'" onclick="record('+e.id+',this);" /></form>';
 			html += '<form class="cancel"><input type="button" value="'+l('cancel')+'" onclick="cancel('+e.id+', \''+e.start+'\',\''+e.channel+'\');" /></form>';
+			html += '<p class="tmdb">'+l('tmdbAttribution')+'</p>';
 			html += '</div>';
 			html += '</div>';
 		}
@@ -217,6 +282,7 @@ function initTimeline() {
 	var start = new Date();
 	var html = '';
 	var i=0;
+	start.setTime(start.getTime()-60*60*1000);
 	start.setMinutes(0);
 	start.setSeconds(0);
 	while (i++<60) {
@@ -241,7 +307,7 @@ function setCurrent() {
 function readChannels(response) {
 	initTimeline();
 	window.channels = response.entries;
-	var y=15;
+	var y=20;
 	var html = '';
 	var channels = new Array();
 	for (var i in response.entries) {
@@ -270,7 +336,7 @@ function readChannels(response) {
 		}
 	}
 	loadEpg();
-	append('<div id="logos">'+html+'</div>');
+	append('<div id="logos" style="height:'+y+'px;">'+html+'</div>');
 	setCurrent();
 }
 

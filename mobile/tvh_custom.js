@@ -1,0 +1,2 @@
+layout = layouts['gborri'];
+tmdbApiKey = '';

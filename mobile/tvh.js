@@ -8,42 +8,6 @@ var activeInput = new Array();
 var selectedLink = null;
 var channelIcons = new Array();
 
-/**
- * %ti		title
- * %su		subtitle
- * %ds_su	dash with subtitle
- * %ds		dash
- * %ep		episode
- * %ds_ep	dash with episode
- * %st		start time
- * %sdt		start date and time
- * %et		end time
- * %edt		end date and time
- * %pb		progress bar
- * %du		duration
- * %ch		channel
- * %pr		priority
- * %br		break/newline
- */
-var layouts =
-{'polini':
-	{
-	'current': '%st%pb%et%br<b>%ti</b>%ds_ep%br%su',
-	'epg': '<span class="small">%st</span> %ti<div class="small">%su</div>',
-	'search': '%ti%ep<div class="small">%st%ds%ch%ds_su</div>',
-	'dvr': '%ti%ds_ep<div class="small">%sdt (%du)%ds_su%ds%pr%ch</div>',
-	},
-'gborri':
-{
-	'current': '%st%pb%et%br<b>%ti</b>%ds_su%br%ep',
-	'epg': '%ti%ds_su<div class="small">%st%ds_ep</div>',
-	'search': '%ti%ds_su<div class="small">%st%ds%ch%ds_ep</div>',
-	'dvr': '%ti%ds_su<div class="small">%sdt (%du)%ds_ep%ds%pr%ch</div>',
-	}
-};
-
-var layout = layouts['polini']; 
-
 function layoutFormat(e, type) {
 	var ret = layout[type];
 	if (e.title == e.subtitle)
@@ -519,7 +483,7 @@ function readRecordings(response) {
 		divs += getRecordingForm(e, which);
 	}
 	if (response.totalCount > epgLoaded[which])
-		html += '<li><a class="more" href="javascript:loadRecordings(\''+which+'\', false);">'+l('getMore')+'</a></li>';
+		html += '<li class="noBgImage"><a class="more" href="javascript:loadRecordings(\''+which+'\', false);">'+l('getMore')+'</a></li>';
 	if (which == 'upcoming') {
 		window.upcoming = response;
 	}
@@ -656,12 +620,12 @@ function readEpg(response) {
 			ins += getEpgForm(e);
 		}
 		if (response.totalCount > epgLoaded[chid])
-			html += '<li><a class="more" href="javascript:loadEpg(\''+chid+'\', \''+response.entries[0].channel+'\', false);">'+l('getMore')+'</a></li>';
+			html += '<li class="noBgImage"><a class="more" href="javascript:loadEpg(\''+chid+'\', \''+response.entries[0].channel+'\', false);">'+l('getMore')+'</a></li>';
 		var ch = document.getElementById('channel_'+chid);
 		if (chid == 's')
 			ch = document.getElementById('search');
 		else if (ch.childNodes.length == 1) {
-			html = '<li><a href="#live_'+chid+'" class="live">'+icon('../icons/control_play.png')+l('liveTv')+'</a></li>' + html;
+			html = '<li class="noBgImage"><a href="#live_'+chid+'" class="live">'+icon('../icons/control_play.png')+l('liveTv')+'</a></li>' + html;
 		}
 		ch.childNodes[ch.childNodes.length-1].outerHTML = '';
 		ch.innerHTML += html;
@@ -834,7 +798,7 @@ function init() {
 	document.getElementById('reloadButton').innerHTML = l('reload');
 	var ini = '';
 	ini += '<li id="epgGroup" class="group">'+l('electronicProgramGuide')+'</li>';
-	ini += '<li><form onsubmit="searchEpg(true);return false;"><div><input id="searchText" class="round" type="text" name="search" /></div>';
+	ini += '<li class="noBgImage"><form onsubmit="searchEpg(true);return false;"><div><input id="searchText" class="round" type="text" name="search" /></div>';
 	ini += '<div><input id="searchButton" type="button" value="'+l('search')+'" style="width:99%;" onclick="searchEpg();"/></div></form></li>';
 	ini += '<li><a href="#tags">'+icon('../icons/tag_blue.png')+l('tags')+'</a></li>';
 	ini += '<li><a href="epg.html" target="_blank">'+icon('images/timeline.png')+l('timeline')+'</a></li>';
