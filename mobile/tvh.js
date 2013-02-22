@@ -549,7 +549,7 @@ function readChannels(response) {
 		sel[sortNo] += '<li><a href="javascript:" code="'+e.name+'" onclick="selectItem(\'channel\',this);">'+e.name+'</a></li>';
 	}
 	for (var i in tagHtml) {
-		var tagch = '';
+		var tagch = '<li class="noBgImage"><a href="epg.html?'+i+'" target="_blank">'+icon('images/timeline.png')+l('timeline')+'</a></li><li class="group">'+l('channels')+'</li>';
 		for (var j in tagHtml[i])
 			tagch += tagHtml[i][j];
 		document.getElementById('tag_'+i).innerHTML = tagch;
