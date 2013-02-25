@@ -73,16 +73,24 @@ function showChannel(id) {
 	}
 }
 
-function ensureVisible(div) {
-	var scroll = document.documentElement || document.body;
-	if (div.offsetLeft+div.offsetWidth > scroll.scrollLeft + scroll.offsetWidth)
-		scroll.scrollLeft = div.offsetLeft+div.offsetWidth - scroll.offsetWidth;  
-	if (div.offsetTop+div.offsetHeight > scroll.scrollTop + scroll.offsetHeight)
-		scroll.scrollTop = div.offsetTop+div.offsetHeight - scroll.offsetHeight;  
-	if (div.offsetTop < scroll.scrollTop)
-		scroll.scrollTop = div.offsetTop;
-	if (div.offsetLeft < scrollLeft)
-		scroll.scrollLeft = div.offsetLeft;
+function ensureVisible(div) {	
+	var scroll = document.body.scrollLeft != undefined ? document.body : document.documentElement;
+	if (div.offsetLeft+div.offsetWidth > scroll.scrollLeft + window.innerWidth) {
+		document.body.scrollLeft = div.offsetLeft+div.offsetWidth - window.innerWidth+10;
+    document.documentElement.scrollLeft = div.offsetLeft+div.offsetWidth - window.innerWidth+10;
+  }  
+	if (div.offsetTop+div.offsetHeight > scroll.scrollTop + window.innerHeight) {
+		document.body.scrollTop = div.offsetTop+div.offsetHeight - window.innerHeight+10;
+    document.documentElement.scrollTop = div.offsetTop+div.offsetHeight - window.innerHeight+10;
+  } 
+	if (div.offsetTop < scroll.scrollTop) {
+		document.body.scrollTop = div.offsetTop;
+		document.documentElement.scrollTop = div.offsetTop;
+	}
+	if (div.offsetLeft < scroll.scrollLeft) {
+		document.body.scrollLeft = div.offsetLeft;
+		document.documentElement.scrollLeft = div.offsetLeft;
+	}
 }
 
 function show(id) {
@@ -129,7 +137,7 @@ function show(id) {
 						var bd = '-';
 						if (response[0].results.length > 0) {
 							p = response[0].results[0].poster_path;
-							if (response[0].results[0].backdrop_path != '')
+							if (response[0].results[0].backdrop_path != '' && response[0].results[0].backdrop_path != null)
 								bd = response[0].results[0].backdrop_path;
 						}
 						loadedPosters[http.title] = p;
@@ -365,5 +373,6 @@ function readContentGroups(response) {
 }
 
 function init() {
+	self.name = 'epg';
 	doGet("ecglist", readContentGroups);
 }
