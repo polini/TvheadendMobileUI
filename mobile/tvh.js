@@ -549,7 +549,7 @@ function readChannels(response) {
 		sel[sortNo] += '<li><a href="javascript:" code="'+e.name+'" onclick="selectItem(\'channel\',this);">'+e.name+'</a></li>';
 	}
 	for (var i in tagHtml) {
-		var tagch = '<li class="noBgImage"><a href="epg.html?'+i+'" target="_blank">'+icon('images/timeline.png')+l('timeline')+'</a></li><li class="group">'+l('channels')+'</li>';
+		var tagch = '<li><a href="epg.html?'+i+'" target="epg">'+icon('images/timeline.png')+l('timeline')+'</a></li><li class="group">'+l('channels')+'</li>';
 		for (var j in tagHtml[i])
 			tagch += tagHtml[i][j];
 		document.getElementById('tag_'+i).innerHTML = tagch;
@@ -801,7 +801,7 @@ function init() {
 	ini += '<li class="noBgImage"><form onsubmit="searchEpg(true);return false;"><div><input id="searchText" class="round" type="text" name="search" /></div>';
 	ini += '<div><input id="searchButton" type="button" value="'+l('search')+'" style="width:99%;" onclick="searchEpg();"/></div></form></li>';
 	ini += '<li><a href="#tags">'+icon('../icons/tag_blue.png')+l('tags')+'</a></li>';
-	ini += '<li><a href="epg.html" target="_blank">'+icon('images/timeline.png')+l('timeline')+'</a></li>';
+	ini += '<li><a href="epg.html" target="epg">'+icon('images/timeline.png')+l('timeline')+'</a></li>';
 	ini += '<li class="group">'+l('digitalVideoRecorder')+'</li>';
 	ini += '<li><a href="#upcoming" onclick="loadRecordings(\'upcoming\', true);">'+icon('../icons/clock.png','')+l('upcomingRecordings')+'</a></li>';
 	ini += '<li><a href="#finished" onclick="loadRecordings(\'finished\', true);">'+icon('../icons/television.png','')+l('finishedRecordings')+'</a></li>';

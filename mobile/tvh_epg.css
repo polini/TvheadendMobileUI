@@ -36,12 +36,43 @@ div.channelinfo {
 	border-radius: 5px;
 	color: #666;
 	padding-left:80px;
+	border:1px solid #666;
 }
 
 div.channelinfo > h1 {
 	font-size: 12pt;
 	text-shadow: 1px 1px 0px #ccc;
 	margin-bottom: 5px;
+}
+
+div.channelinfo > div.left {
+	position: relative;
+	left: -65px;
+	top: 30px;
+	width:50px;
+	text-align:center;
+}
+
+div.left img.back {
+	margin-top:10px;
+}
+
+span.chno {
+	border: 1px solid #385487;
+	background-color:white;
+	color: #385487;
+	font-size: 16px;
+	font-weight: bold;
+	vertical-align: middle;
+	padding: 1px 5px;
+	margin-right: 6px;
+}
+
+.round {
+	-moz-border-radius: 20px; /* Firefox */
+	-webkit-border-radius: 20px; /* Safari, Chrome */
+	-khtml-border-radius: 20px; /* Konqueror */
+	border-radius: 20px; /* CSS3 */
 }
 
 div#timeline > div {
