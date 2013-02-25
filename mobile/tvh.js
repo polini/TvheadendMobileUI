@@ -795,6 +795,7 @@ function reload(initial) {
 }
 
 function init() {
+	self.name = 'tvheadend';
 	document.getElementById('reloadButton').innerHTML = l('reload');
 	var ini = '';
 	ini += '<li id="epgGroup" class="group">'+l('electronicProgramGuide')+'</li>';
