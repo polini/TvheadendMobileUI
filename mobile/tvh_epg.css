@@ -13,6 +13,29 @@ div#logos {
     z-index: 6;
 }
 
+div.ct_16 { background-color: #e0e0e0!important; }
+div.ct_16 div.bgimage{ background:url(images/movies.png) no-repeat right top; }
+div.ct_32 { background-color: #EFE8AD!important; }
+div.ct_32 div.bgimage {  background:url(images/news.png) no-repeat right top; }
+div.ct_48 { background-color: #C6B5DE!important; }
+div.ct_48 div.bgimage{ background:url(images/show.png) no-repeat right top; }
+div.ct_64 { background-color: #FFFF6B!important; }
+div.ct_64 div.bgimage {  background:url(images/sports.png) no-repeat right top; }
+div.ct_80 { background-color: #FFCE9C!important; }
+div.ct_80 div.bgimage{ background:url(images/children.png) no-repeat right top; }
+div.ct_96 { background-color: #94D639!important; }
+div.ct_96 div.bgimage{ background:url(images/music.png) no-repeat right top; }
+div.ct_112 { background-color: #F7BDDE!important; }
+div.ct_112 div.bgimage {  background:url(images/arts.png) no-repeat right top; }
+div.ct_128 { background-color: #94D6CE!important; }
+div.ct_128 div.bgimage{ background:url(images/social.png) no-repeat right top; }
+div.ct_144 { background-color: #BDC6DE!important; }
+div.ct_144 div.bgimage{ background:url(images/science.png) no-repeat right top; }
+div.ct_160 { background-color: #FFC6A5!important; }
+div.ct_160 div.bgimage {  background:url(images/hobbies.png) no-repeat right top; }
+div.ct_178 { background-color: #A5DE94!important; }
+div.ct_178 div.bgimage {  background:url(images/special.png) no-repeat right top; }
+
 div#timeline {
 	position: absolute;
 	left: 0px;
@@ -35,22 +58,34 @@ div.channelinfo {
 	font-family: Arial;
 	border-radius: 5px;
 	color: #666;
-	padding-left:80px;
 	border:1px solid #666;
 }
 
-div.channelinfo > h1 {
+div.channelinfo > div.right > h1 {
 	font-size: 12pt;
-	text-shadow: 1px 1px 0px #ccc;
 	margin-bottom: 5px;
 }
 
+div.channelinfo {
+	text-shadow: 1px 1px 0px #ccc;
+}
+
 div.channelinfo > div.left {
-	position: relative;
-	left: -65px;
-	top: 30px;
-	width:50px;
+	position: absolute;
+	left: 0px;
+	top: 60px;
+	width:75px;
 	text-align:center;
+}
+
+div.channelinfo > div.right {
+	margin-left:80px;
+}
+
+div.channelinfo > a.back {
+	position: absolute;
+	left: 10px;
+	top: 140px;
 }
 
 div.left img.back {
@@ -92,6 +127,7 @@ div#current {
 	left: -1px;
 	height: 0px;
 	z-index: 5;
+	box-shadow: 3px 3px 3px #000;
 }
 
 p.tmdb {
@@ -115,21 +151,24 @@ div.box {
 }
 
 div.box.backdrop {
-	background-size: cover;
+  background-size: cover;
 	background-position: left top;
 }
 
-div.box > div.head {
+div.box div.head {
 	height: 50px;
 }
 
-div.box.big > div.head {
+div.box.big div.head {
 	height: auto;
 }
 
 div.box h1 {
 	margin: 0px 2px;
 	font-size: 12pt;
+}
+
+div.box {
 	text-shadow: 1px 1px 0px #fff;
 }
 
@@ -151,46 +190,46 @@ div.poster img {
 	margin:2px 10px;
 }
 
-div.box > div.add > form.record > input,
-div.box > div.add > form.record > select,
-div.box > div.add > form.cancel > input,
+div.box div.add > form.record > input,
+div.box div.add > form.record > select,
+div.box div.add > form.cancel > input,
 div.channelinfo select,
 div.channelinfo button
 	{
 	min-width: 200px;
 }
 
-div.box.backdrop > div {
+div.box.backdrop  div.gradient {
 	background:url(images/white75.png);
 }
 
-div.box > div.add > form {
+div.box div.add > form {
 	padding: 5px;
 }
-div.box > div.add > p {
+div.box div.add > p {
 	padding: 2px;
 }
 
-div.box > div.add > p.channel {
+div.box div.add > p.channel {
 	font-style: italic;
 }
 
-div.box > div.add > form.cancel {
+div.box div.add > form.cancel {
 	display: none;
 	text-align: center;
 }
 
-div.box > div.add > form.record {
+div.box div.add > form.record {
 	text-align: center;
 }
 
-div.scheduled > div.add > form.cancel,
-div.recording > div.add > form.cancel {
+div.scheduled div.add > form.cancel,
+div.recording div.add > form.cancel {
 	display: block;
 }
 
-div.scheduled > div.add > form.record,
-div.recording > div.add > form.record {
+div.scheduled div.add > form.record,
+div.recording div.add > form.record {
 	display: none;
 }
 
@@ -200,7 +239,7 @@ div.channelinfo h2 {
 	font-size: 10pt;
 }
 
-div.box > div.add > h3 {
+div.box div.add > h3 {
 	margin: 1px 2px;
 	font-size: 10pt;
 	text-align: right;
@@ -215,12 +254,12 @@ div.box.big {
 	min-height: 60px;
 }
 
-div.box > div.add {
+div.box div.add {
 	padding-top: 5px;
 	display: none;
 }
 
-div.box.big > div.add {
+div.box.big div.add {
 	display: block;
 }
 

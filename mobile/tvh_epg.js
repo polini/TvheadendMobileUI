@@ -11,6 +11,7 @@ var contentGroups = new Array();
 var selectedTag = 0;
 var channelTags = new Array();
 var nullTime = new Date().getTime()/1000;
+var endTimes = new Array();
 var scaleDown = 10;
 var leftPadding = 150;
 var epgLoaded = 0;
@@ -20,25 +21,13 @@ var tagSelect;
 var cancelRecordingId;
 var cancelRecordingStart;
 var cancelRecordingChannel;
-var colors = new Array();
 var loadedPosters = new Array();
 var loadedBackdrops = new Array();
 var posterWidth = 92;
 var backdropWidth = 780;
 var tmdbImgUrl = 'http://d3gtl9l2a4fn1j.cloudfront.net/t/p/w';
-colors[16*0] = '#94D6E7';
-colors[16*1] = '#A5DE94';
-colors[16*2] = '#94D639';
-colors[16*3] = '#94D6CE';
-colors[16*4] = '#C6B5DE';
-colors[16*5] = '#FFCE9C';
-colors[16*6] = '#FFFF6B';
-colors[16*7] = '#EFE8AD';
-colors[16*8] = '#F7BDDE';
-colors[16*9] = '#BDC6DE';
-colors[16*10] = '#FFC6A5';
 
-function loadEpg(chid, chname, reload) {
+function loadEpg() {
 	doPost("epg", readEpg, 'start='+start+'&limit='+limit+'&tag='+channelTags[selectedTag]);
 }
 
@@ -73,16 +62,30 @@ function showChannel(id) {
 	}
 }
 
-function ensureVisible(div) {	
-	var scroll = document.body.scrollLeft != undefined ? document.body : document.documentElement;
+function ensureVisible(div) {
+	var scroll;
+	if (document.documentElement.scrollLeft != undefined) {
+		if (document.body.scrollLeft != undefined) {
+			if (document.body.scrollLeft > document.documentElement.scrollLeft || document.body.scrollTop > document.documentElement.scrollTop)
+				scroll = document.body;
+			else
+				scroll = document.documentElement;
+		}
+		else {
+			scroll = document.documentElement;
+		}
+	}
+	else {
+		scroll = document.body;
+	}
 	if (div.offsetLeft+div.offsetWidth > scroll.scrollLeft + window.innerWidth) {
 		document.body.scrollLeft = div.offsetLeft+div.offsetWidth - window.innerWidth+10;
-    document.documentElement.scrollLeft = div.offsetLeft+div.offsetWidth - window.innerWidth+10;
-  }  
+		document.documentElement.scrollLeft = div.offsetLeft+div.offsetWidth - window.innerWidth+10;
+	}  
 	if (div.offsetTop+div.offsetHeight > scroll.scrollTop + window.innerHeight) {
 		document.body.scrollTop = div.offsetTop+div.offsetHeight - window.innerHeight+10;
-    document.documentElement.scrollTop = div.offsetTop+div.offsetHeight - window.innerHeight+10;
-  } 
+		document.documentElement.scrollTop = div.offsetTop+div.offsetHeight - window.innerHeight+10;
+	} 
 	if (div.offsetTop < scroll.scrollTop) {
 		document.body.scrollTop = div.offsetTop;
 		document.documentElement.scrollTop = div.offsetTop;
@@ -129,16 +132,19 @@ function show(id) {
 				http.div = div;
 				http.poster = poster;
 				http.pw = posterWidth;
-				
+
 				http.onreadystatechange = function() {
 					if(http.readyState == 4 && http.status == 200) {
 						var response = JSON.parse("[" + http.responseText + "]");
 						var p = '-';
 						var bd = '-';
-						if (response[0].results.length > 0) {
-							p = response[0].results[0].poster_path;
-							if (response[0].results[0].backdrop_path != '' && response[0].results[0].backdrop_path != null)
-								bd = response[0].results[0].backdrop_path;
+						for (var i=0; i<response[0].results.length; i++) {
+							if (response[0].results[i].title == http.title) {
+								p = response[0].results[i].poster_path;
+								if (response[0].results[i].backdrop_path != '' && response[0].results[i].backdrop_path != null)
+									bd = response[0].results[i].backdrop_path;
+								break;
+							}
 						}
 						loadedPosters[http.title] = p;
 						loadedBackdrops[http.title] = bd;
@@ -174,6 +180,10 @@ function readEpg(response) {
 		var last = lastEpgX == undefined ? 0 : lastEpgX;
 		for (var i in response.entries) {
 			var e = response.entries[i];
+			if (endTimes[e.end] == undefined)
+				endTimes[e.end] = 1;
+			else
+				endTimes[e.end]++;
 			var w = (e.duration/scaleDown);
 			var x = timestampToX(e.start);
 			var y = channelToY[e.channel];
@@ -182,9 +192,10 @@ function readEpg(response) {
 				x=0;
 			}
 			last = x > last ? x : last;
+			if (e.contenttype == undefined) e.contenttype = 0;
 			e.contenttype -= e.contenttype % 16;
-			html += '<div id="e_'+e.id+'" class="box '+e.schedstate+'" style="top:'+y+'px;left:'+x+'px;width:'+w+'px;height:'+lh+'px;background-color:'+colors[e.contenttype]+';">';
-			html += '<div class="head" onclick="show('+e.id+');"><h1>'+e.title+'</h1>';
+			html += '<div id="e_'+e.id+'" class="box '+e.schedstate+' ct_'+e.contenttype+'" style="top:'+y+'px;left:'+x+'px;width:'+w+'px;height:'+lh+'px;">';
+			html += '<div class="bgimage"><div class="gradient"><div class="head" onclick="show('+e.id+');"><h1>'+e.title+'</h1>';
 			var sub = '';
 			if (e.subtitle != undefined && e.subtitle != e.title)
 				sub += e.subtitle;
@@ -193,10 +204,12 @@ function readEpg(response) {
 			html += '<h2>'+sub+'</h2></div>';
 			html += '<div class="add"><div class="poster"></div><h3 onclick="show('+e.id+');">'+nvl(contentGroups[e.contenttype])+'</h3><p class="desc" onclick="show('+e.id+');">'+nvl(e.description)+'</p>';
 			html += '<p class="time">' + getDateTimeFromTimestamp(e.start, true) + '&ndash;' + getTimeFromTimestamp(e.start+e.duration) + ' (' + getDuration(e.duration) + l('hour.short') + ')</p>';
-			html += '<p class="channel">' + e.channel + ' &mdash; <a href="http://akas.imdb.org/find?q='+e.title+'" target="_blank">'+l('imdbSearch')+'</a></p><br clear="all" />';
+			html += '<p class="channel">' + e.channel + ' &mdash; <a href="http://akas.imdb.org/find?q='+e.title+'" target="_blank">'+l('imdbSearch')+'</a> &mdash; <a href="http://www.themoviedb.org/search?query='+e.title+'" target="_blank">'+l('tmdbSearch')+'</a></p><br clear="all" />';
 			html += '<form class="record">'+configSelect+'<br /><input type="button" value="'+l('record')+'" onclick="record('+e.id+',this);" /></form>';
 			html += '<form class="cancel"><input type="button" value="'+l('cancel')+'" onclick="cancel('+e.id+', \''+e.start+'\',\''+e.channel+'\');" /></form>';
 			html += '<p class="tmdb">'+l('tmdbAttribution')+'</p>';
+			html += '</div>';
+			html += '</div>';
 			html += '</div>';
 			html += '</div>';
 		}
@@ -297,6 +310,12 @@ function readChannelTags(response) {
 function loadMoreEpg() {
 	lastEpgX = undefined;
 	start += limit;
+	for (var i in endTimes) {
+		if (i < new Date()/1000)
+			start -= endTimes[i];
+	}
+	if (start < 0)
+		start = 0;
 	loadEpg();
 }
 
@@ -344,14 +363,15 @@ function readChannels(response) {
 	for (var i in channels) {
 		for (var j in channels[i]) {
 			var e = channels[i][j];
-			html += '<div id="c_'+e.chid+'" style="left:-5px;top:'+(y-1)+'px;" class="channelinfo"><h1>'+e.name+'</h1>';
-			html += '<div class="left">' + (e.number != undefined ? '<span class="chno round">'+e.number+'</span><br />' : '');
-		 	html += '<a target="tvheadend" href="index.html"><img class="back" src="images/tvheadend128.png" title="back to mobile UI" width="50px" /></a></div>';
 			var streamUrl = window.location.protocol+'//'+window.location.host+'/stream/channelid/'+e.chid;
-			html += '<h2>'+icon('../icons/control_play.png') + l('liveTv')+'</h2><p>'+streamUrl+'</p>';
+			html += '<div id="c_'+e.chid+'" style="left:-5px;top:'+(y-1)+'px;" class="channelinfo">';
+			html += '<div class="right"><h1>'+e.name+'</h1><h2>'+icon('../icons/control_play.png') + l('liveTv')+'</h2><p>'+streamUrl+'</p>';
 			html += '<p><a target="_blank" href="'+streamUrl+'"><button>HTTP</button></a>';
 			html += '<a target="_blank" href="buzzplayer://'+streamUrl+'"><button>Buzzplayer</button></a></p>';
 			html += '<hr><h2>'+icon('../icons/tag_blue.png') + l('tags') + '</h2><p>' + tagSelect + '</p>';
+			html += '</div>';
+			html += (e.number != undefined ? '<div class="left"><span class="chno round">'+e.number+'</span></div>' : '');
+			html += '<a class="back" target="tvheadend" href="index.html"><img class="back" src="images/tvheadend128.png" title="back to mobile UI" width="50px" /></a>';
 			html += '</div>';
 			html += '<img id="i_'+e.chid+'" height="'+lh+'px" onclick="showChannel('+e.chid+');" class="channel" src="'+e.ch_icon+'" alt="'+e.name+'" title="'+e.name+'" style="left:0px;top:'+y+'px;" />';
 			channelToY[e.name] = y;
