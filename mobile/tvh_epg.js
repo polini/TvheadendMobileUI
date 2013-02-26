@@ -55,16 +55,16 @@ function showChannel(id) {
 		var div = document.getElementById('c_'+id);
 		div.style.display = 'block';
 		document.getElementById('i_'+lastChannel).style.zIndex = '8';
-		ensureVisible(div);
+		ensureVisible(div, false);
 	}
 	else {
 		lastChannel = '';
 	}
 }
 
-function ensureVisible(div) {
+function ensureVisible(div, horiz) {
 	var scroll = /Safari/.test(navigator.userAgent) ? document.body : document.documentElement;
-	if (div.offsetLeft+div.offsetWidth > scroll.scrollLeft + window.innerWidth) {
+	if (horiz && div.offsetLeft+div.offsetWidth > scroll.scrollLeft + window.innerWidth) {
 		scroll.scrollLeft = div.offsetLeft+div.offsetWidth - window.innerWidth+10;
 	}  
 	if (div.offsetTop+div.offsetHeight > scroll.scrollTop + window.innerHeight) {
@@ -73,7 +73,7 @@ function ensureVisible(div) {
 	if (div.offsetTop < scroll.scrollTop) {
 		scroll.scrollTop = div.offsetTop;
 	}
-	if (div.offsetLeft < scroll.scrollLeft) {
+	if (horiz && div.offsetLeft < scroll.scrollLeft) {
 		scroll.scrollLeft = div.offsetLeft;
 	}
 }
@@ -145,7 +145,7 @@ function show(id) {
 				};
 			}
 		}
-		ensureVisible(div);
+		ensureVisible(div, true);
 	}
 	else {
 		last = '';
