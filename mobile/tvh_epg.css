@@ -150,6 +150,10 @@ div.box {
 	cursor: pointer;
 }
 
+div.box div {
+  border-radius: 5px;
+}
+
 div.box.backdrop {
   background-size: cover;
 	background-position: left top;
@@ -252,6 +256,7 @@ div.box.big {
 	-webkit-box-shadow: 3px 3px 5px #666;
 	min-width: 300px;
 	min-height: 60px;
+	color: #333;
 }
 
 div.box div.add {

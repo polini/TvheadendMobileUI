@@ -63,36 +63,18 @@ function showChannel(id) {
 }
 
 function ensureVisible(div) {
-	var scroll;
-	if (document.documentElement.scrollLeft != undefined) {
-		if (document.body.scrollLeft != undefined) {
-			if (document.body.scrollLeft > document.documentElement.scrollLeft || document.body.scrollTop > document.documentElement.scrollTop)
-				scroll = document.body;
-			else
-				scroll = document.documentElement;
-		}
-		else {
-			scroll = document.documentElement;
-		}
-	}
-	else {
-		scroll = document.body;
-	}
+	var scroll = /Safari/.test(navigator.userAgent) ? document.body : document.documentElement;
 	if (div.offsetLeft+div.offsetWidth > scroll.scrollLeft + window.innerWidth) {
-		document.body.scrollLeft = div.offsetLeft+div.offsetWidth - window.innerWidth+10;
-		document.documentElement.scrollLeft = div.offsetLeft+div.offsetWidth - window.innerWidth+10;
+		scroll.scrollLeft = div.offsetLeft+div.offsetWidth - window.innerWidth+10;
 	}  
 	if (div.offsetTop+div.offsetHeight > scroll.scrollTop + window.innerHeight) {
-		document.body.scrollTop = div.offsetTop+div.offsetHeight - window.innerHeight+10;
-		document.documentElement.scrollTop = div.offsetTop+div.offsetHeight - window.innerHeight+10;
+		scroll.scrollTop = div.offsetTop+div.offsetHeight - window.innerHeight+10;
 	} 
 	if (div.offsetTop < scroll.scrollTop) {
-		document.body.scrollTop = div.offsetTop;
-		document.documentElement.scrollTop = div.offsetTop;
+		scroll.scrollTop = div.offsetTop;
 	}
 	if (div.offsetLeft < scroll.scrollLeft) {
-		document.body.scrollLeft = div.offsetLeft;
-		document.documentElement.scrollLeft = div.offsetLeft;
+		scroll.scrollLeft = div.offsetLeft;
 	}
 }
 
@@ -202,7 +184,7 @@ function readEpg(response) {
 			if (e.episode != undefined)
 				sub += (sub.length > 0 ? ' &mdash; ' : '') + e.episode;
 			html += '<h2>'+sub+'</h2></div>';
-			html += '<div class="add"><div class="poster"></div><h3 onclick="show('+e.id+');">'+nvl(contentGroups[e.contenttype])+'</h3><p class="desc" onclick="show('+e.id+');">'+nvl(e.description)+'</p>';
+			html += '<div class="add">'+(e.contenttype==0||e.contenttype==16?'<div class="poster"></div>':'')+'<h3 onclick="show('+e.id+');">'+nvl(contentGroups[e.contenttype])+'</h3><p class="desc" onclick="show('+e.id+');">'+nvl(e.description)+'</p>';
 			html += '<p class="time">' + getDateTimeFromTimestamp(e.start, true) + '&ndash;' + getTimeFromTimestamp(e.start+e.duration) + ' (' + getDuration(e.duration) + l('hour.short') + ')</p>';
 			html += '<p class="channel">' + e.channel + ' &mdash; <a href="http://akas.imdb.org/find?q='+e.title+'" target="_blank">'+l('imdbSearch')+'</a> &mdash; <a href="http://www.themoviedb.org/search?query='+e.title+'" target="_blank">'+l('tmdbSearch')+'</a></p><br clear="all" />';
 			html += '<form class="record">'+configSelect+'<br /><input type="button" value="'+l('record')+'" onclick="record('+e.id+',this);" /></form>';
