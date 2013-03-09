@@ -799,7 +799,7 @@ function init() {
 	document.getElementById('reloadButton').innerHTML = l('reload');
 	var ini = '';
 	ini += '<li id="epgGroup" class="group">'+l('electronicProgramGuide')+'</li>';
-	ini += '<li class="noBgImage"><form onsubmit="searchEpg(true);return false;"><div><input id="searchText" class="round" type="text" name="search" /></div>';
+	ini += '<li class="noBgImage"><form onsubmit="searchEpg(true);return false;"><div style="position:relative;"><input id="searchText" class="round" type="text" name="search" onfocus="document.getElementById(\'clearSearch\').style.display=\'\';" onkeydown="document.getElementById(\'clearSearch\').style.display=\'\';" onblur="setTimeout(function() {document.getElementById(\'clearSearch\').style.display=\'none\';},200);" /><img id="clearSearch" src="images/clearsearch.png" style="display:none;position:absolute;top:2px;right:8px;" onclick="document.getElementById(\'searchText\').value=\'\';document.getElementById(\'searchText\').focus();"></div>';
 	ini += '<div><input id="searchButton" type="button" value="'+l('search')+'" style="width:99%;" onclick="searchEpg();"/></div></form></li>';
 	ini += '<li><a href="#tags">'+icon('../icons/tag_blue.png')+l('tags')+'</a></li>';
 	ini += '<li><a href="epg.html" target="epg">'+icon('images/timeline.png')+l('timeline')+'</a></li>';
