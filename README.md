@@ -63,4 +63,4 @@ or create symlink
 
 ## License
 
-Licensed under GLPv3 (see LICENSE)
+Licensed under GPLv3 (see LICENSE)
