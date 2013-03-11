@@ -365,7 +365,7 @@ function getIntro(e) {
 	divs += '<h1>'+e.title+'</h1>';
 	if (e.subtitle != undefined)
 		divs += '<h2>'+e.subtitle+'</h2>';
-	divs += '<p class="description">'+nvl(e.description)+'</p>';
+	divs += '<p class="description">'+nvl(e.description)+'</p><div style="clear:both;height:1px;"></div>';
 	return divs;
 }
 
