@@ -211,6 +211,14 @@ function readContentGroups(response) {
 	document.getElementById('genreSelector').innerHTML = sel;
 }
 
+function readDiskspace(response) {
+	if (response.totaldiskspace > 0) {
+		var occup = 100 - (100*response.freediskspace/response.totaldiskspace);
+		document.getElementById('diskspace').innerHTML = icon('../icons/drive.png')+getProgressBar(200, occup) + Math.round(occup) + '%';
+		document.getElementById('diskspace').style.display = '';
+	}
+}
+
 function readConfigs(response) {
 	window.configs = response.entries;
 	var sel='';
@@ -754,6 +762,7 @@ function loadAutomaticRecorderList() {
 function initialLoad() {
 	doGet("ecglist", readContentGroups);
 	doPost("confignames", readConfigs, "op=list");
+	doGet("diskspace", readDiskspace);
 	loadStandardTable("channeltags", readChannelTags);
 	loadRecordings('upcoming', true);
 }
@@ -809,10 +818,12 @@ function init() {
 	ini += '<li><a href="#failed" onclick="loadRecordings(\'failed\', true);">'+icon('../icons/exclamation.png','')+l('failedRecordings')+'</a></li>';
 	ini += '<li><a href="#ar" onclick="loadAutomaticRecorderList();">'+icon('../icons/wand.png','')+l('automaticRecorder')+'</a></li>';
 	ini += '<li class="group">'+l('informationStatus')+'</li>';
+	ini += '<li style="display:none;" class="noBgImage" id="diskspace"></li>';
 	ini += '<li><a href="#subscriptions" onclick="loadSubscriptions();">'+icon('../icons/eye.png')+l('subscriptions')+'</a></li>';
 	ini += '<li><a href="#adapters" onclick="loadAdapters();">'+icon('../icons/pci.png')+l('adapters')+'</a></li>';
 	ini += '<li><a href="#about" onclick="loadAbout();">'+icon('../icons/information.png')+l('about')+'</a></li>';
 	ini += '<li><a href="../../extjs.html" target="_blank">'+icon('../htslogo.png')+l('desktopSite')+'</a></li>';
+
 	document.getElementById('home').innerHTML += ini;
 	var app = '';
 	app += '<ul id="tags" title="'+l('tags')+'"><li>'+l('loading')+'</li></ul>';
