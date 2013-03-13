@@ -810,7 +810,7 @@ function reload(initial) {
 			if (initial) 
 				showInitialPage('upcoming');
 			else
-				loadRecordings('finished', true);
+				loadRecordings('upcoming', true);
 		}
 		if (location.hash.indexOf('#_finished') == 0) {
 			loadRecordings('finished', true);
