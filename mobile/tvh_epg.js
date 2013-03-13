@@ -232,7 +232,7 @@ function record(id, button) {
 function readCancelEpg(response) {
 	if (response.success == 1) {
 		var e = document.getElementById('e_'+cancelRecordingId);
-		e.className = 'big box';
+		e.className = e.className.replace('scheduled','').replace('recording','');
 	}
 	else {
 		alert(l('errorCreatingOrDeleteRecordingEntry'));
@@ -243,7 +243,7 @@ function readRecordEpg(response) {
 	if (response.success == 1) {
 		var e = document.getElementById('e_'+response.param);
 		if (e.style.left <= document.getElementById('current').style.left)
-			e.className += ' running';
+			e.className += ' recording';
 		else
 			e.className += ' scheduled';
 	}

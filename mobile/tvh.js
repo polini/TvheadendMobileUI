@@ -214,7 +214,7 @@ function readContentGroups(response) {
 function readDiskspace(response) {
 	if (response.totaldiskspace > 0) {
 		var occup = 100 - (100*response.freediskspace/response.totaldiskspace);
-		document.getElementById('diskspace').innerHTML = icon('../icons/drive.png')+getProgressBar(200, occup) + Math.round(occup) + '%';
+		document.getElementById('diskspace').innerHTML = icon('../icons/drive.png','left')+getProgressBar(200, occup) + Math.round(occup) + '%';
 		document.getElementById('diskspace').style.display = '';
 	}
 }
@@ -400,8 +400,10 @@ function getEpgForm(e) {
 
 function readRecordEpg(response) {
 	if (response.success == 1) {
-		loadRecordings('upcoming');
+		loadRecordings('upcoming', true);
 		reloadChannelEpg(response.param);
+		if (epgLoaded['s'] > 0)
+			searchEpg(false,false);
 	}
 	else {
 		alert(l('errorCreatingOrDeleteRecordingEntry'));
@@ -493,7 +495,12 @@ function readRecordings(response) {
 	if (response.totalCount > epgLoaded[which])
 		html += '<li class="noBgImage"><a class="more" href="javascript:loadRecordings(\''+which+'\', false);">'+l('getMore')+'</a></li>';
 	if (which == 'upcoming') {
-		window.upcoming = response;
+		if (window.upcoming == undefined)
+			window.upcoming = response;
+		else {
+			for (var i in response.entries)
+				window.upcoming.entries[window.upcoming.entries.length] = response.entries[i];
+		}
 	}
 	list.childNodes[list.childNodes.length-1].outerHTML = '';
 	list.innerHTML += html;
@@ -512,6 +519,8 @@ function loadRecordings(which, reload) {
 		if (limit == 0) limit = 20;
 		var ch = document.getElementById(which);
 		ch.innerHTML = '<li>'+l('loading')+'</li>';
+		if (which == 'upcoming')
+			upcoming = undefined;
 	}
 	var params = 'start='+start+'&limit='+limit;
 	epgLoaded[which] = start+limit;
@@ -574,6 +583,8 @@ function readCancelEntry(response) {
 	if (response.success == 1) {
 		if (response.param != undefined)
 			loadRecordings(response.param, true);
+		if (epgLoaded['s'] > 0)
+			searchEpg(false,false);
 		iui.goBack();
 	}
 	else {
@@ -585,6 +596,8 @@ function readDeleteEntry(response) {
 	if (response.success == 1) {
 		if (response.param != undefined)
 			loadRecordings(response.param, true);
+		if (epgLoaded['s'] > 0)
+			searchEpg(false,false);
 		iui.goBack();
 	}
 	else {
@@ -610,9 +623,9 @@ function readEpg(response) {
 		for (var i in response.entries) {
 			var e = response.entries[i];
 			var day = getDateFromTimestamp(e.start, true);
-			if (lastEpgDay == undefined || lastEpgDay != day) {
+			if (lastEpgDay[chid] == undefined || lastEpgDay[chid] != day) {
 				html += '<li class="group">'+day+'</li>';
-				lastEpgDay = day;
+				lastEpgDay[chid] = day;
 			}
 			var epg = '';
 			if (e.schedstate == 'scheduled')
@@ -733,26 +746,27 @@ function readAutomaticRecorderList(response) {
 	append(divs);
 }
 
-function searchEpg(wait) {
+function searchEpg(show, wait, reload) {
 	var tosearch = document.getElementById('searchText').value;
 	lastSearch = tosearch;
-	var start = epgLoaded['s'] != undefined ? epgLoaded['s'] : 0;
+	var start = 0;
+	lastEpgDay['s'] = '';
 	var limit = 20;
 	if (reload) {
-		limit = start;
-		start=0;
-		if (limit == 0) limit = 20;
-		var ch = document.getElementById('search');
-		ch.innerHTML = '<li>'+l('loading')+'</li>';
-		lastEpgDay['s'] = '';
+		limit = epgLoaded['s'];
+		if (limit == 0 || limit == undefined) limit = 20;
 	}
+	var ch = document.getElementById('search');
+	ch.innerHTML = '<li>'+l('loading')+'</li>';
 	var params = 'start='+start+'&limit='+limit+'&title='+tosearch;
 	epgLoaded['s'] = start+limit;
 	doPostWithParam("epg", readEpg, params, 's');
-	if (wait)
-		setTimeout(function() {iui.showPageById('search');}, 1000);
-	else
-		iui.showPageById('search');
+	if (show) {
+		if (wait)
+			setTimeout(function() {iui.showPageById('search');}, 1000);
+		else
+			iui.showPageById('search');
+	}
 }
 
 function loadAutomaticRecorderList() {
@@ -771,10 +785,16 @@ function reload(initial) {
 	if (initial || location.hash == '#_home' || location.hash == '' || location.hash == undefined)
 		initialLoad();
 	if (location.hash != undefined) {
-		if (location.hash.indexOf('#_tag') == 0)
-			initialLoad();			
-		if (location.hash.indexOf('#_ar') == 0)
+		if (location.hash.indexOf('#_tag') == 0) {
+			initialLoad();
+			if (initial)
+				showInitialPage('tags');
+		}
+		if (location.hash.indexOf('#_ar') == 0) {
 			loadAutomaticRecorderList();
+			if (initial)
+				showInitialPage('ar');
+		}
 		if (location.hash.indexOf('#_channel_') == 0) {
 			var chid = location.hash.replace('#_channel_', '');
 			reloadChannelIdEpg(chid);
@@ -786,21 +806,55 @@ function reload(initial) {
 				reloadChannelEpg(channel);
 			}
 		}
-		if (location.hash.indexOf('#_upcoming') == 0)
-			loadRecordings('upcoming', true);
-		if (location.hash.indexOf('#_finished') == 0)
+		if (location.hash.indexOf('#_upcoming') == 0) {
+			if (initial) 
+				showInitialPage('upcoming');
+			else
+				loadRecordings('finished', true);
+		}
+		if (location.hash.indexOf('#_finished') == 0) {
 			loadRecordings('finished', true);
-		if (location.hash.indexOf('#_failed') == 0)
+			if (initial)
+				showInitialPage('finished');
+		}
+		if (location.hash.indexOf('#_failed') == 0) {
 			loadRecordings('failed', true);
+			if (initial)
+				showInitialPage('failed');
+		}
 		if (location.hash.indexOf('#_rec_') == 0 && lastRecordingType != undefined)
 			loadRecordings(lastRecordingType, true);
-		if (location.hash.indexOf('#_about') == 0)
+		if (location.hash.indexOf('#_about') == 0) {
 			loadAbout();
-		if (location.hash.indexOf('#_subscription') == 0)
+			if (initial)
+				showInitialPage('about');
+		}
+		if (location.hash.indexOf('#_subscription') == 0) {
 			loadSubscriptions();
-		if (location.hash.indexOf('#_adapter') == 0)
+			if (initial)
+				showInitialPage('subscription');
+		}
+		if (location.hash.indexOf('#_adapter') == 0) {
 			loadAdapters();
+			if (initial)
+				showInitialPage('adapter');
+		}
+		if (location.hash.indexOf('#_search') == 0)
+			if (!initial)
+				searchEpg(false,false,true);
 	}
+}
+
+function showInitialPage(page) {
+	iui.showPageById('home');
+	iui.showPageById(page);
+}
+
+function showClearSearch(visible) {
+	if (visible)
+		document.getElementById('clearSearch').style.display = '';
+	else
+		setTimeout(function() {document.getElementById('clearSearch').style.display = 'none';}, 200);
 }
 
 function init() {
@@ -808,8 +862,8 @@ function init() {
 	document.getElementById('reloadButton').innerHTML = l('reload');
 	var ini = '';
 	ini += '<li id="epgGroup" class="group">'+l('electronicProgramGuide')+'</li>';
-	ini += '<li class="noBgImage"><form onsubmit="searchEpg(true);return false;"><div style="position:relative;"><input id="searchText" class="round" type="text" name="search" onfocus="document.getElementById(\'clearSearch\').style.display=\'\';" onkeydown="document.getElementById(\'clearSearch\').style.display=\'\';" onblur="setTimeout(function() {document.getElementById(\'clearSearch\').style.display=\'none\';},200);" /><img id="clearSearch" src="images/clearsearch.png" style="display:none;position:absolute;top:2px;right:8px;" onclick="document.getElementById(\'searchText\').value=\'\';document.getElementById(\'searchText\').focus();"></div>';
-	ini += '<div><input id="searchButton" type="button" value="'+l('search')+'" style="width:99%;" onclick="searchEpg();"/></div></form></li>';
+	ini += '<li class="noBgImage"><form onsubmit="searchEpg(true,true);return false;"><div style="position:relative;"><input id="searchText" class="round" type="text" name="search" onfocus="showClearSearch(true);" onkeydown="showClearSearch(true);" onblur="showClearSearch(false);" /><img id="clearSearch" src="images/clearsearch.png" style="display:none;position:absolute;top:2px;right:1.2%;cursor:pointer;" onclick="document.getElementById(\'searchText\').value=\'\';document.getElementById(\'searchText\').focus();"></div>';
+	ini += '<div><input id="searchButton" type="button" value="'+l('search')+'" style="width:99%;" onclick="searchEpg(true,false);"/></div></form></li>';
 	ini += '<li><a href="#tags">'+icon('../icons/tag_blue.png')+l('tags')+'</a></li>';
 	ini += '<li><a href="epg.html" target="epg">'+icon('images/timeline.png')+l('timeline')+'</a></li>';
 	ini += '<li class="group">'+l('digitalVideoRecorder')+'</li>';
@@ -818,7 +872,7 @@ function init() {
 	ini += '<li><a href="#failed" onclick="loadRecordings(\'failed\', true);">'+icon('../icons/exclamation.png','')+l('failedRecordings')+'</a></li>';
 	ini += '<li><a href="#ar" onclick="loadAutomaticRecorderList();">'+icon('../icons/wand.png','')+l('automaticRecorder')+'</a></li>';
 	ini += '<li class="group">'+l('informationStatus')+'</li>';
-	ini += '<li style="display:none;" class="noBgImage" id="diskspace"></li>';
+	ini += '<li style="display:none;text-align:center;" class="noBgImage" id="diskspace"></li>';
 	ini += '<li><a href="#subscriptions" onclick="loadSubscriptions();">'+icon('../icons/eye.png')+l('subscriptions')+'</a></li>';
 	ini += '<li><a href="#adapters" onclick="loadAdapters();">'+icon('../icons/pci.png')+l('adapters')+'</a></li>';
 	ini += '<li><a href="#about" onclick="loadAbout();">'+icon('../icons/information.png')+l('about')+'</a></li>';

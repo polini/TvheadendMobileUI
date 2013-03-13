@@ -24,7 +24,7 @@ var layouts =
 	{
 	'current': '%st%pb%et%br<b>%ti</b>%ds_ep%br%su',
 	'epg': '<span class="small">%st</span> %ti<div class="small">%su</div>',
-	'search': '%ti%ep<div class="small">%st%ds%ch%ds_su</div>',
+	'search': '%ti%ds_ep<div class="small">%st%ds%ch%ds_su</div>',
 	'dvr': '%ti%ds_ep<div class="small">%sdt (%du)%ds_su%ds%pr%ch</div>',
 	},
 'gborri':
@@ -148,9 +148,10 @@ function image(url) {
 		return '';
 }
 
-function icon(path) {
+function icon(path,align) {
+	var alignt = align != undefined ? ' align="'+align+'"' : '';
 	if (path)
-		return '<img src="'+path+'" height="16px" width="16px" />';
+		return '<img src="'+path+'"'+alignt+' height="16px" width="16px" />';
 	else
 		return '';
 }
