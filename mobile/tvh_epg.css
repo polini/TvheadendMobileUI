@@ -148,6 +148,7 @@ div.box {
 	overflow: hidden;
 	color: #666;
 	cursor: pointer;
+	box-shadow: 1px 1px 1.5px #999;
 }
 
 div.box div {

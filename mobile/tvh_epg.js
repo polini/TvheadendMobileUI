@@ -296,6 +296,7 @@ function loadMoreEpg() {
 		if (i < new Date()/1000)
 			start -= endTimes[i];
 	}
+	endTimes = new Array();
 	if (start < 0)
 		start = 0;
 	loadEpg();

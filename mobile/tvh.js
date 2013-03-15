@@ -7,6 +7,7 @@ var channels = new Array();
 var activeInput = new Array();
 var selectedLink = null;
 var channelIcons = new Array();
+var endTimes = new Array();
 
 function layoutFormat(e, type) {
 	var ret = layout[type];
@@ -619,9 +620,15 @@ function readEpg(response) {
 	var html = '';
 	var ins = '';
 	var chid = response.param;
+	if (endTimes[chid] == undefined)
+		endTimes[chid] = new Array();
 	if (response.entries.length > 0) {
 		for (var i in response.entries) {
 			var e = response.entries[i];
+			if (endTimes[chid][e.end] == undefined)
+				endTimes[chid][e.end] = 1;
+			else
+				endTimes[chid][e.end]++;
 			var day = getDateFromTimestamp(e.start, true);
 			if (lastEpgDay[chid] == undefined || lastEpgDay[chid] != day) {
 				html += '<li class="group">'+day+'</li>';
@@ -673,6 +680,15 @@ function loadEpg(chid, chname, reload) {
 		ch.innerHTML = '<li>'+l('loading')+'</li>';
 		lastEpgDay[chid] = undefined;
 	}
+	if (endTimes[chid] == undefined)
+		endTimes[chid] = new Array();
+	for (var i in endTimes[chid]) {
+		if (i < new Date()/1000)
+			start -= endTimes[chid][i];
+	}
+	endTimes[chid] = new Array();
+	if (start < 0)
+		start = 0;
 	var params = 'start='+start+'&limit='+limit+'&channel='+chname;
 	if (chid == 's')
 		params = 'start='+start+'&limit='+limit+'&title='+lastSearch;
@@ -751,6 +767,7 @@ function searchEpg(show, wait, reload) {
 	lastSearch = tosearch;
 	var start = 0;
 	lastEpgDay['s'] = '';
+	endTimes['s'] = new Array();
 	var limit = 20;
 	if (reload) {
 		limit = epgLoaded['s'];
