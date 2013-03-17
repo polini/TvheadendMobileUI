@@ -217,6 +217,7 @@ function readDiskspace(response) {
 		var occup = 100 - (100*response.freediskspace/response.totaldiskspace);
 		document.getElementById('diskspace').innerHTML = icon('../icons/drive.png','left')+getProgressBar(200, occup) + Math.round(occup) + '%';
 		document.getElementById('diskspace').style.display = '';
+		document.getElementById('diskspaceHeader').style.display = '';
 	}
 }
 
@@ -299,6 +300,7 @@ function getRecordingForm(e, type) {
 	divs += textField('channel', e.channel, true);
 	divs += textField('priority', (e.pri != undefined ? l('prio.'+e.pri) : ''), true);
 	divs += textField('start', getDateTimeFromTimestamp(e.start, true), true);
+	divs += textField('end', getDateTimeFromTimestamp(e.start+e.duration, true), true);
 	divs += textField('duration', getDuration(e.duration)+l('hour.short'), true);
 	divs += textField('config', e.config_name, true);
 	var status = l('status.'+e.status)!='status.'+e.status ? l('status.'+e.status) : e.status;
@@ -376,6 +378,7 @@ function getEpgForm(e) {
 	divs += textField('episode', e.episode, true);
 	divs += textField('channel', e.channel, true);
 	divs += textField('start', getDateTimeFromTimestamp(e.start, true), true);
+	divs += textField('end', getDateTimeFromTimestamp(e.start+e.duration, true), true);
 	divs += textField('duration', getDuration(e.duration)+l('hour.short'), true);
 	divs += textField('genre', contentGroups[e.contenttype], true);
 	if (e.schedstate != "") {
@@ -878,6 +881,8 @@ function init() {
 	self.name = 'tvheadend';
 	document.getElementById('reloadButton').innerHTML = l('reload');
 	var ini = '';
+	ini += '<li style="display:none;" id="diskspaceHeader" class="group">'+l('diskspace')+'</li>';
+	ini += '<li style="display:none;text-align:center;" class="noBgImage" id="diskspace"></li>';
 	ini += '<li id="epgGroup" class="group">'+l('electronicProgramGuide')+'</li>';
 	ini += '<li class="noBgImage"><form onsubmit="searchEpg(true,true);return false;"><div style="position:relative;"><input id="searchText" class="round" type="text" name="search" onfocus="showClearSearch(true);" onkeydown="showClearSearch(true);" onblur="showClearSearch(false);" /><img id="clearSearch" src="images/clearsearch.png" style="display:none;position:absolute;top:2px;right:1.2%;cursor:pointer;" onclick="document.getElementById(\'searchText\').value=\'\';document.getElementById(\'searchText\').focus();"></div>';
 	ini += '<div><input id="searchButton" type="button" value="'+l('search')+'" style="width:99%;" onclick="searchEpg(true,false);"/></div></form></li>';
@@ -889,7 +894,6 @@ function init() {
 	ini += '<li><a href="#failed" onclick="loadRecordings(\'failed\', true);">'+icon('../icons/exclamation.png','')+l('failedRecordings')+'</a></li>';
 	ini += '<li><a href="#ar" onclick="loadAutomaticRecorderList();">'+icon('../icons/wand.png','')+l('automaticRecorder')+'</a></li>';
 	ini += '<li class="group">'+l('informationStatus')+'</li>';
-	ini += '<li style="display:none;text-align:center;" class="noBgImage" id="diskspace"></li>';
 	ini += '<li><a href="#subscriptions" onclick="loadSubscriptions();">'+icon('../icons/eye.png')+l('subscriptions')+'</a></li>';
 	ini += '<li><a href="#adapters" onclick="loadAdapters();">'+icon('../icons/pci.png')+l('adapters')+'</a></li>';
 	ini += '<li><a href="#about" onclick="loadAbout();">'+icon('../icons/information.png')+l('about')+'</a></li>';

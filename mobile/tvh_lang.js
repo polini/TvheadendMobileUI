@@ -9,6 +9,7 @@ var i18nstrings =
 	'search': 'Suchen',
 	'priority': 'Priorität',
 	'start': 'Start',
+	'end': 'Ende',
 	'config': 'Konfig.',
 	'duration': 'Dauer',
 	'status': 'Status',
@@ -91,6 +92,7 @@ var i18nstrings =
 	'timeline': 'Zeitleiste',
 	'imdbSearch': 'IMDB-Suche',
 	'tmdbSearch': 'TMDB-Suche',
+	'diskspace': 'Speicherplatz'
 },
 'en':
 {
@@ -102,6 +104,7 @@ var i18nstrings =
 	'search': 'Search',
 	'priority': 'Priority',
 	'start': 'Start',
+	'end': 'End',
 	'config': 'Config.',
 	'duration': 'Duration',
 	'status': 'Status',
@@ -176,6 +179,7 @@ var i18nstrings =
 	'timeline': 'Timeline',
 	'imdbSearch': 'Search IMDB',
 	'tmdbSearch': 'Search TMDB',
-	'tmdbAttribution': 'This product uses the <a href="http://themoviedb.org/" target="_blank">TMDb</a> API but is not endorsed or certified by TMDb.'
+	'tmdbAttribution': 'This product uses the <a href="http://themoviedb.org/" target="_blank">TMDb</a> API but is not endorsed or certified by TMDb.',
+	'diskspace': 'Disk space'
 }
 };
