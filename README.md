@@ -37,6 +37,13 @@ Have a look at the screenshots in the folder "screenshots"!
 ![ScreenShot](https://raw.github.com/polini/TvheadendMobileUI/master/screenshots/timeline.png)
 
 
+## Listings magazine
+
+ - Also included is a listings magazine with the channels each on a separate column. You can select a tag, skip to the next day or skip to the next page. You can also show and hide columns. It is possible to schedule and recordings from the listing. Just click on a title or subtitle.
+
+![ScreenShot](https://raw.github.com/polini/TvheadendMobileUI/master/screenshots/magazine.png)
+
+
 ## Installation
 
 First checkout repository
@@ -54,7 +61,9 @@ or create symlink
 ## Usage
 
  - You can now access the web interface: http://ip:9981/static/mobile/index.html
+ - The mobile page can be accessed via: http://ip:9981/static/mobile/mobile.html
  - The EPG timeline can accessed via: http://ip:9981/static/mobile/epg.html
+ - The listings magazine can be accessed via: http://ip:9981/static/mobile/mag.html
 
 ## Please notice
 
