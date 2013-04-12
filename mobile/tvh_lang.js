@@ -92,7 +92,10 @@ var i18nstrings =
 	'timeline': 'Zeitleiste',
 	'imdbSearch': 'IMDB-Suche',
 	'tmdbSearch': 'TMDB-Suche',
-	'diskspace': 'Speicherplatz'
+	'diskspace': 'Speicherplatz',
+	'magazine': 'Programmzeitschrift',
+	'backToMobileUi': 'zurück zur mobilen Ansicht',
+	'mobileUi': 'mobile Ansicht'
 },
 'en':
 {
@@ -180,6 +183,9 @@ var i18nstrings =
 	'imdbSearch': 'Search IMDB',
 	'tmdbSearch': 'Search TMDB',
 	'tmdbAttribution': 'This product uses the <a href="http://themoviedb.org/" target="_blank">TMDb</a> API but is not endorsed or certified by TMDb.',
-	'diskspace': 'Disk space'
+	'diskspace': 'Disk space',
+	'magazine': 'Listings',
+	'backToMobileUi': 'back to mobile UI',
+	'mobileUi': 'mobile UI'
 }
 };

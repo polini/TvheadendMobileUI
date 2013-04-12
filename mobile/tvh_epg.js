@@ -76,6 +76,9 @@ function ensureVisible(div, horiz) {
 	if (horiz && div.offsetLeft < scroll.scrollLeft) {
 		scroll.scrollLeft = div.offsetLeft;
 	}
+	if (horiz && div.offsetLeft+div.offsetWidth > scroll.scrollLeft + window.innerWidth) {
+		scroll.scrollLeft = div.offsetLeft+div.offsetWidth - window.innerWidth+10;
+	}  
 }
 
 function show(id) {
@@ -354,7 +357,7 @@ function readChannels(response) {
 			html += '<hr><h2>'+icon('../icons/tag_blue.png') + l('tags') + '</h2><p>' + tagSelect + '</p>';
 			html += '</div>';
 			html += (e.number != undefined ? '<div class="left"><span class="chno round">'+e.number+'</span></div>' : '');
-			html += '<a class="back" target="tvheadend" href="index.html"><img class="back" src="images/tvheadend128.png" title="back to mobile UI" width="50px" /></a>';
+			html += '<a class="back" target="tvheadend" href="mobile.html"><img class="back" src="images/tvheadend128.png" title="'+l('backToMobileUi')+'" width="50px" /></a>';
 			html += '</div>';
 			html += '<img id="i_'+e.chid+'" height="'+lh+'px" onclick="showChannel('+e.chid+');" class="channel" src="'+e.ch_icon+'" alt="'+e.name+'" title="'+e.name+'" style="left:0px;top:'+y+'px;" />';
 			channelToY[e.name] = y;

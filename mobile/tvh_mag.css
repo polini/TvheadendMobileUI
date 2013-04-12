@@ -1,0 +1,154 @@
+body {
+	background-color: white;
+}
+
+div#tags {
+	padding-left:0px;
+}
+
+div#tags a.link {
+	display:inline-block;
+	border:1px solid #999;
+	border-radius: 5px;
+	padding:2px;
+	white-space:nowrap;
+	text-decoration:none;
+	color:#999;
+	box-shadow: 1px 1px 1.5px #999;
+	margin:3px;
+}
+
+div#tags a.link.selected {
+	background-color:#f0f090;
+	border-color:#333;
+	box-shadow: 2px 2px 1.5px #333;
+	font-weight:bold;
+	color:black;
+}
+
+div#tags a:hover {
+	background-color:#ff9;
+	border-color:#333;
+	color:black;
+	box-shadow: 2px 2px 1.5px #333;
+}
+
+table#epg {
+	width:100%;
+	background-color:black;
+	border-spacing:1px;
+	border-collapse:true;
+}
+
+table#epg > tbody > tr > th,
+table#epg > tbody > tr > td {
+	background-color:white;
+}
+
+th, td { 
+	vertical-align:top;
+}
+
+table#epg > tbody > tr > td.even,
+table#epg > tbody > tr > th.even { 
+	background-color:#f0f0f0;
+}
+
+table#epg > tbody > tr > td.odd,
+table#epg > tbody > tr > th.odd {
+	background-color:#ffc;
+}
+
+body,h1,h2,th,td,li,input,select {
+	font-family:Arial; 
+	font-size:10pt;
+}
+
+div.title { 
+	font-size: 12pt;
+	cursor:pointer;
+}
+
+td.time { 
+	font-weight:bold;
+}
+
+div.subtitle {
+	font-weight:bold;
+	cursor:pointer;
+}
+
+td.scheduled {
+	background: url('../icons/clock.png') no-repeat 10px 20px;
+	min-height:36px;
+}
+
+table.inner td.big div.description,
+table.inner td.primetime div.description {
+	display:block;
+}
+
+div.duration {
+	text-align:right;
+	margin-right:5px;
+}
+
+div.description {
+	cursor:pointer;
+	font-style:italic;
+}
+
+tr.current {
+  color:#990000!important;
+}
+
+table.inner td.big div.action,
+table.inner td.big div.duration {
+	display:block;
+}
+
+div.action select,
+div.action input {
+	width:100%;
+}
+
+td.recording {
+	background: url('../icons/rec.png') no-repeat 10px 20px;
+	min-height:36px;
+}
+
+table.inner { 
+	border-spacing:3px;
+	background-color:transparent;
+}
+
+table.inner div.description,
+table.inner div.duration,
+table.inner div.action {
+	display:none;
+}
+
+div#date {
+	text-align:center;
+	font-size:18pt;
+}
+
+div#date span {
+	padding:5px;
+}
+
+div.stream {
+  display:none;
+}
+
+div.stream.big {
+  display:block;
+}
+
+div.stream button {
+  width:100%;
+}
+
+span.link, a.link, div.link {
+	cursor:pointer;
+}

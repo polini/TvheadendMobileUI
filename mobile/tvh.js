@@ -488,12 +488,18 @@ function readRecordings(response) {
 	var divs = '';
 	for (var i in response.entries) {	
 		var e = response.entries[i];
+		var day = getDateFromTimestamp(e.start, true);
+		if (lastEpgDay[which] == undefined || lastEpgDay[which] != day) {
+			html += '<li class="group">'+day+'</li>';
+			lastEpgDay[which] = day;
+		}
 		html += '<li><a href="#rec_' + e.id + '">';
 		if (e.schedstate == 'recording')
 			html += icon('../icons/rec.png', '(recording)');
 		if (e.schedstate == 'scheduled')
 			html += icon('../icons/clock.png', '(scheduled)');
 		html += layoutFormat(e, 'dvr');
+		html += '</a></li>';
 		divs += getRecordingForm(e, which);
 	}
 	if (response.totalCount > epgLoaded[which])
@@ -570,7 +576,7 @@ function readChannels(response) {
 		sel[sortNo] += '<li><a href="javascript:" code="'+e.name+'" onclick="selectItem(\'channel\',this);">'+e.name+'</a></li>';
 	}
 	for (var i in tagHtml) {
-		var tagch = '<li><a href="epg.html?'+i+'" target="epg">'+icon('images/timeline.png')+l('timeline')+'</a></li><li class="group">'+l('channels')+'</li>';
+		var tagch = '<li><a href="epg.html?'+i+'" target="epg">'+icon('images/timeline.png')+l('timeline')+'</a></li><li><a href="mag.html?'+i+'" target="mag">'+icon('images/book_open.png')+l('magazine')+'</a></li><li class="group">'+l('channels')+'</li>';
 		for (var j in tagHtml[i])
 			tagch += tagHtml[i][j];
 		document.getElementById('tag_'+i).innerHTML = tagch;
@@ -888,6 +894,7 @@ function init() {
 	ini += '<div><input id="searchButton" type="button" value="'+l('search')+'" style="width:99%;" onclick="searchEpg(true,false);"/></div></form></li>';
 	ini += '<li><a href="#tags">'+icon('../icons/tag_blue.png')+l('tags')+'</a></li>';
 	ini += '<li><a href="epg.html" target="epg">'+icon('images/timeline.png')+l('timeline')+'</a></li>';
+	ini += '<li><a href="mag.html" target="mag">'+icon('images/book_open.png')+l('magazine')+'</a></li>';
 	ini += '<li class="group">'+l('digitalVideoRecorder')+'</li>';
 	ini += '<li><a href="#upcoming" onclick="loadRecordings(\'upcoming\', true);">'+icon('../icons/clock.png','')+l('upcomingRecordings')+'</a></li>';
 	ini += '<li><a href="#finished" onclick="loadRecordings(\'finished\', true);">'+icon('../icons/television.png','')+l('finishedRecordings')+'</a></li>';

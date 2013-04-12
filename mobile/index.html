@@ -1,32 +1,48 @@
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+"http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
-	<!-- meta name="apple-mobile-web-app-capable" content="yes" -->
 	<title>Tvheadend</title>
   	<link rel="apple-touch-icon" href="images/tvheadend128.png" />
-	<link rel="stylesheet" href="iui/iui.css" type="text/css" />
-	<link rel="stylesheet" href="iui/t/default/default-theme.css" type="text/css" />
-	<link rel="stylesheet" href="tvh.css" type="text/css" />
-	<script type="application/x-javascript" src="iui/iui.js"></script>
+  	<link rel="stylesheet" href="tvh_mag.css" type="text/css" />
 	<script type="application/x-javascript" src="tvh_lang.js"></script>
 	<script type="application/x-javascript" src="tvh_common.js"></script>
-	<script type="application/x-javascript" src="tvh.js"></script>
-	<script type="application/x-javascript" src="tvh_custom.js"></script>
 </head>
-<body id="body">
-	<div class="toolbar">
-		<h1 id="pageTitle">Tvheadend</h1>
-		<a id="backButton" class="button" href="#"></a> <a id="reloadButton" class="button" href="javascript:reload();">Reload</a>
-	</div>
-
-	<ul id="home" title="Tvheadend" selected="true">
-	</ul>
-	
-	<div id="last"></div>
-	<script type="text/javascript">
-	init();
-	</script>
+<style type="text/css">
+body {
+	background-color:#f0f0f0;
+}
+table {
+	margin:auto;
+}
+td {
+	padding:20px;
+	text-align:center;
+}
+img {
+	box-shadow: 4px 4px 2.5px #999;
+}
+a {
+	color:black;
+	text-decoration:none;
+	font-size:14pt;
+}
+a:hover {
+	text-decoration:underline;
+	text-shadow: 1px 1px 1px #999;
+}
+</style>
+<script type="application/x-javascript">
+function init() {
+	document.getElementById('body').innerHTML = '<table><tr><td><a href="mobile.html">'+image('images/mobile.png','',200)+'<br />'+l('mobileUi')+'</a></td>' +
+	'<td><a href="epg.html">'+image('images/timeline200.png','',200)+'<br />'+l('timeline')+'</a></td></tr>' +
+	'<tr><td><a href="mag.html">'+image('images/magazine.png','',200)+'<br />'+l('magazine')+'</a></td>' +
+	'<td><a href="../../">'+image('images/desktop.png','',200)+'<br />'+l('desktopSite')+'</a></td>' +
+	'</tr></table>';
+}
+</script>
+<body id="body" onload="init();">
 </body>
 </html>
+

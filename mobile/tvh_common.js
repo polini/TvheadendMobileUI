@@ -25,14 +25,14 @@ var layouts =
 	'current': '%st%pb%et%br<b>%ti</b>%ds_ep%br%su',
 	'epg': '<span class="small">%st</span> %ti<div class="small">%su</div>',
 	'search': '%ti%ds_ep<div class="small">%st%ds%ch%ds_su</div>',
-	'dvr': '%ti%ds_ep<div class="small">%sdt (%du)%ds_su%ds%pr%ch</div>',
+	'dvr': '%ti%ds_ep<div class="small">%st (%du)%ds_su%ds%pr%ch</div>',
 	},
 'gborri':
 {
 	'current': '%st%pb%et%br<b>%ti</b>%ds_su%br%ep',
 	'epg': '%ti%ds_su<div class="small">%st%ds_ep</div>',
 	'search': '%ti%ds_su<div class="small">%st%ds%ch%ds_ep</div>',
-	'dvr': '%ti%ds_su<div class="small">%sdt (%du)%ds_ep%ds%pr%ch</div>',
+	'dvr': '%ti%ds_su<div class="small">%st (%du)%ds_ep%ds%pr%ch</div>',
 	}
 };
 
@@ -141,9 +141,11 @@ function doGet(path, callback) {
 	http.send(null);
 }
 
-function image(url) {
+function image(url, align, size) {
+	var s = size != undefined ? size : 35;
+	var a = align != undefined ? align : 'top';
 	if (url)
-		return '<img src="'+url+'" align="top" width="35px" />';
+		return '<img src="'+url+'" align="'+a+'" width="'+s+'px" />';
 	else
 		return '';
 }
