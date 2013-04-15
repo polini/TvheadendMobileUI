@@ -236,8 +236,10 @@ function readChannelTags(response) {
 	var html = icon('../icons/tag_blue.png')+'<a id="t_" onclick="selectTag(\'\');" class="link'+sel+'">'+l('allChannels')+'</a>';
 	for (var i=0; i<response.entries.length; i++) {	
 		var e = response.entries[i];
-		sel = window.selectedTag == e.id ? ' selected' : '';
-		html += '<a id="t_'+e.id+'" onclick="selectTag('+e.id+');" class="link'+sel+'">'+e.name+'</a>\n';
+		if (e.enabled == '1' && e.internal == '0') {
+			sel = window.selectedTag == e.id ? ' selected' : '';
+			html += '<a id="t_'+e.id+'" onclick="selectTag('+e.id+');" class="link'+sel+'">'+e.name+'</a>\n';
+		}
 	}
 	document.getElementById('tags').innerHTML = html;
 }
