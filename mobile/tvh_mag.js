@@ -87,7 +87,7 @@ function readEpg(response) {
 				var xclass = nvl(e.schedstate);
 				var yclass = (start.getHours() == 20 || start.getHours() == 21)  && e.duration > 60*60 ? 'primetime' : '';
 				var add = e.schedstate != undefined ? '<br />&nbsp;' : '';
-				var html = '<tr class="item" start="'+e.start+'" duration="'+e.duration+'"><td class="time '+xclass+'">' + getTimeFromTimestamp(e.start) + add + '</td>\n<td class="content '+yclass+'" id="e_'+e.id+'"><div class="title"><a onclick="showHide(\'e_'+e.id+'\');">'+e.title+'</a></div><div class="subtitle" onclick="showHide(\'e_'+e.id+'\');">'+nvl(e.subtitle)+'</div><div onclick="showHide(\'e_'+e.id+'\');" class="description">'+nvl(e.description)+'</div><div class="duration">'+getDuration(e.duration)+l('hour.short')+' &mdash; '+getTimeFromTimestamp(e.start+e.duration)+'</div><div class="action">';
+				var html = '<tr class="item" start="'+e.start+'" duration="'+e.duration+'"><td class="time '+xclass+'">' + getTimeFromTimestamp(e.start) + add + '</td>\n<td class="content '+yclass+'" id="e_'+e.id+'"><div class="title"><a onclick="showHide(\'e_'+e.id+'\');">'+e.title+'<span class="episode">'+nvl(e.episode)+'</span></a></div><div class="subtitle" onclick="showHide(\'e_'+e.id+'\');">'+nvl(e.subtitle)+'</div><div onclick="showHide(\'e_'+e.id+'\');" class="description">'+nvl(e.description)+'</div><div class="duration">'+getDuration(e.duration)+l('hour.short')+' &mdash; '+getTimeFromTimestamp(e.start+e.duration)+'</div><div class="action">';
 				if (e.schedstate == 'scheduled' || e.schedstate == 'recording')
 					html += '<input type="button" value="'+l('cancel')+'" onclick="cancel('+e.id+', \''+e.start+'\',\''+e.channel+'\');" />';
 				else

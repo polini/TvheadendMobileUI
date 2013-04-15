@@ -69,6 +69,14 @@ div.title {
 	cursor:pointer;
 }
 
+span.episode {
+	padding: 2px;
+	font-size: 9pt;
+	background-color: black;
+	color: white;
+	font-weight: bold;
+}
+
 td.time { 
 	font-weight:bold;
 }
