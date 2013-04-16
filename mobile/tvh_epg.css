@@ -269,7 +269,8 @@ div.box.big div.add {
 	display: block;
 }
 
-img.channel {
+img.channel,
+div.channel {
 	position: absolute;
 	z-index: 7;
 	cursor:pointer;
@@ -277,4 +278,9 @@ img.channel {
     max-width: 70px;
 	height: auto;
     width: auto;
+}
+
+div.channel {
+	font-family: Arial;
+	text-shadow: 1px 1px 0px #ccc;
 }

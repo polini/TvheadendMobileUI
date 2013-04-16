@@ -359,7 +359,10 @@ function readChannels(response) {
 			html += (e.number != undefined ? '<div class="left"><span class="chno round">'+e.number+'</span></div>' : '');
 			html += '<a class="back" target="tvheadend" href="mobile.html"><img class="back" src="images/tvheadend128.png" title="'+l('backToMobileUi')+'" width="50px" /></a>';
 			html += '</div>';
-			html += '<img id="i_'+e.chid+'" height="'+lh+'px" onclick="showChannel('+e.chid+');" class="channel" src="'+e.ch_icon+'" alt="'+e.name+'" title="'+e.name+'" style="left:0px;top:'+y+'px;" />';
+			if (e.ch_icon != undefined && e.ch_icon != "") 
+				html += '<img id="i_'+e.chid+'" height="'+lh+'px" onclick="showChannel('+e.chid+');" class="channel" src="'+e.ch_icon+'" alt="'+e.name+'" title="'+e.name+'" style="left:0px;top:'+y+'px;" />';
+			else
+				html += '<div id="i_'+e.chid+'" onclick="showChannel('+e.chid+');" class="channel" title="'+e.name+'" style="left:0px;top:'+y+'px;height:'+lh+'px;" />'+e.name+'</div>';
 			channelToY[e.name] = y;
 			y+=lh+gap;
 			maxHeight = y;
