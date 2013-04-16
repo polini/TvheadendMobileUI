@@ -75,7 +75,7 @@ function getDuration(seconds) {
 
 function l(key) {
 	var fallback = 'en';
-	var lang = navigator.language.substring(0,2);
+	var lang = navigator.language != undefined ? navigator.language.substring(0,2) : fallback;
 	if (i18nstrings[lang] != undefined && i18nstrings[lang][key] != undefined)
 		return i18nstrings[lang][key];
 	else if (i18nstrings[fallback][key] != undefined)

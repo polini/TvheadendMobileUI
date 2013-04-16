@@ -9,13 +9,13 @@
 	<link rel="stylesheet" href="iui/iui.css" type="text/css" />
 	<link rel="stylesheet" href="iui/t/default/default-theme.css" type="text/css" />
 	<link rel="stylesheet" href="tvh.css" type="text/css" />
-	<script type="application/x-javascript" src="iui/iui.js"></script>
-	<script type="application/x-javascript" src="tvh_lang.js"></script>
-	<script type="application/x-javascript" src="tvh_common.js"></script>
-	<script type="application/x-javascript" src="tvh.js"></script>
-	<script type="application/x-javascript" src="tvh_custom.js"></script>
+	<script type="text/javascript" src="iui/iui.js"></script>
+	<script type="text/javascript" src="tvh_lang.js"></script>
+	<script type="text/javascript" src="tvh_common.js"></script>
+	<script type="text/javascript" src="tvh.js"></script>
+	<script type="text/javascript" src="tvh_custom.js"></script>
 </head>
-<body id="body">
+<body id="body" onload="init();">
 	<div class="toolbar">
 		<h1 id="pageTitle">Tvheadend</h1>
 		<a id="backButton" class="button" href="#"></a> <a id="reloadButton" class="button" href="javascript:reload();">Reload</a>
@@ -25,8 +25,5 @@
 	</ul>
 	
 	<div id="last"></div>
-	<script type="text/javascript">
-	init();
-	</script>
 </body>
 </html>
