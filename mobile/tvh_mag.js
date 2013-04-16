@@ -285,7 +285,7 @@ function initTable() {
 	html += '</tr>';
 	for (var i=4;i<=24; i+=4) {
 		var styleClass = (i/4)%2==0 ? 'even' : 'odd';
-		html += '<tr><th class="'+styleClass+'">'+i+' Uhr</th>';
+		html += '<tr><th class="'+styleClass+'">'+i+':00</th>';
 		for (var j=0; j<numChannels;j++) {
 			html += '<td class="'+styleClass+'"><table class="inner" id="'+i+'_'+j+'"></table></td>';
 		}
