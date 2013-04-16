@@ -58,6 +58,12 @@ or create symlink
 
 	$ sudo ln -s `pwd`/TvheadendMobileUI/mobile/ /usr/local/share/tvheadend/src/webui/static/mobile
 
+The target directory may vary. It could also be /usr/share/tvheadend/src/webui/static/mobile.
+
+### OpenELEC Tvheadend add-on
+
+When you installed Tvheadend as an OpenELEC add-on, you can not use TvheadendMobileUI at the moment, as the static html pages are bundled in the Tvheadend binary.
+
 ## Usage
 
  - You can now access the web interface: http://ip:9981/static/mobile/index.html
