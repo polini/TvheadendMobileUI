@@ -249,7 +249,7 @@ function selectTag(tag) {
 	document.getElementById('t_'+selectedTag).className = 'link';
 	selectedTag = tag;
 	document.getElementById('t_'+selectedTag).className = 'link selected';
-	initEpg();
+	pageChannels(0);
 }
 
 function init() {
