@@ -8,6 +8,8 @@ var activeInput = new Array();
 var selectedLink = null;
 var channelIcons = new Array();
 var endTimes = new Array();
+var channelTagsLoaded = false;
+var channelsLoaded = false;
 
 function layoutFormat(e, type) {
 	var ret = layout[type];
@@ -216,8 +218,6 @@ function readDiskspace(response) {
 	if (response.totaldiskspace > 0) {
 		var occup = 100 - (100*response.freediskspace/response.totaldiskspace);
 		document.getElementById('diskspace').innerHTML = icon('../icons/drive.png','left')+getProgressBar(200, occup) + Math.round(occup) + '%';
-		document.getElementById('diskspace').style.display = '';
-		document.getElementById('diskspaceHeader').style.display = '';
 	}
 }
 
@@ -290,7 +290,7 @@ function readChannelTags(response) {
 		all2 += sel[i];
 	document.getElementById('tagSelector').innerHTML = all2;
 	append(ins);
-	doPost("channels", readChannels, "op=list");
+	window.channelTagsLoaded = true;
 }
 
 function getRecordingForm(e, type) {
@@ -545,6 +545,10 @@ function imageClass(url, id) {
 }
 
 function readChannels(response) {
+	if (!window.channelTagsLoaded) {
+		window.setTimeout(function() { readChannels(response); }, 200);
+		return;
+	}
 	window.channels = response.entries;
 	var sel = new Array();
 	sel[0] = '<li><a href="javascript:" code="" onclick="selectItem(\'channel\',this);">'+l('any')+'</a></li>';
@@ -586,7 +590,7 @@ function readChannels(response) {
 		sels += sel[i];
 	append(app);
 	document.getElementById('channelSelector').innerHTML = sels;
-	loadCurrent();
+	window.channelsLoaded = true;
 }
 
 function readCancelEntry(response) {
@@ -721,6 +725,10 @@ function readCurrent(response) {
 var current = new Array();
 
 function loadCurrent() {
+	if (!window.channelsLoaded) {
+		window.setTimeout(function() { loadCurrent(); }, 200);
+		return;
+	}
 	doPost("epg", readCurrent, "start=0&limit="+(channels.length*2));
 }
 
@@ -803,7 +811,11 @@ function initialLoad() {
 	doGet("ecglist", readContentGroups);
 	doPost("confignames", readConfigs, "op=list");
 	doGet("diskspace", readDiskspace);
+	channelTagsLoaded = false;
+	channelsLoaded = false;
 	loadStandardTable("channeltags", readChannelTags);
+	doPost("channels", readChannels, "op=list");
+	loadCurrent();
 	loadRecordings('upcoming', true);
 }
 
@@ -887,8 +899,8 @@ function init() {
 	self.name = 'tvheadend';
 	document.getElementById('reloadButton').innerHTML = l('reload');
 	var ini = '';
-	ini += '<li style="display:none;" id="diskspaceHeader" class="group">'+l('diskspace')+'</li>';
-	ini += '<li style="display:none;text-align:center;" class="noBgImage" id="diskspace"></li>';
+	ini += '<li id="diskspaceHeader" class="group">'+l('diskspace')+'</li>';
+	ini += '<li style="text-align:center;" class="noBgImage" id="diskspace">'+icon('../icons/drive.png','left')+'&mdash;'+'</li>';
 	ini += '<li id="epgGroup" class="group">'+l('electronicProgramGuide')+'</li>';
 	ini += '<li class="noBgImage"><form onsubmit="searchEpg(true,true);return false;"><div style="position:relative;"><input id="searchText" class="round" type="text" name="search" onfocus="showClearSearch(true);" onkeydown="showClearSearch(true);" onblur="showClearSearch(false);" /><img id="clearSearch" src="images/clearsearch.png" style="display:none;position:absolute;top:2px;right:1.2%;cursor:pointer;" onclick="document.getElementById(\'searchText\').value=\'\';document.getElementById(\'searchText\').focus();"></div>';
 	ini += '<div><input id="searchButton" type="button" value="'+l('search')+'" style="width:99%;" onclick="searchEpg(true,false);"/></div></form></li>';
