@@ -702,9 +702,9 @@ function loadEpg(chid, chname, reload) {
 	endTimes[chid] = new Array();
 	if (start < 0)
 		start = 0;
-	var params = 'start='+start+'&limit='+limit+'&channel='+chname;
+	var params = 'start='+start+'&limit='+limit+'&channel='+encodeURIComponent(chname);
 	if (chid == 's')
-		params = 'start='+start+'&limit='+limit+'&title='+lastSearch;
+		params = 'start='+start+'&limit='+limit+'&title='+encodeURIComponent(lastSearch);
 	epgLoaded[chid] = start+limit;
 	doPostWithParam("epg", readEpg, params, chid);
 }
