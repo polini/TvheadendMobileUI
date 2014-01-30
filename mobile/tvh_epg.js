@@ -289,7 +289,7 @@ function readChannelTags(response) {
 	for (var i in sel)
 		tagSelect += sel[i];
 	tagSelect += '</select>';
-	doPost("channels", readChannels, "op=list");
+	doPost("api/channel/grid", readChannels, "");
 }
 
 function loadMoreEpg() {
@@ -349,8 +349,8 @@ function readChannels(response) {
 	for (var i in channels) {
 		for (var j in channels[i]) {
 			var e = channels[i][j];
-			var streamUrl = window.location.protocol+'//'+window.location.host+'/stream/channelid/'+e.chid;
-			html += '<div id="c_'+e.chid+'" style="left:-5px;top:'+(y-1)+'px;" class="channelinfo">';
+			var streamUrl = window.location.protocol+'//'+window.location.host+'/stream/channel/'+e.uuid;
+			html += '<div id="c_'+e.uuid+'" style="left:-5px;top:'+(y-1)+'px;" class="channelinfo">';
 			html += '<div class="right"><h1>'+e.name+'</h1><h2>'+icon('../icons/control_play.png') + l('liveTv')+'</h2><p>'+streamUrl+'</p>';
 			html += '<p><a target="_blank" href="'+streamUrl+'"><button>HTTP</button></a>';
 			html += '<a target="_blank" href="buzzplayer://'+streamUrl+'"><button>Buzzplayer</button></a></p>';
@@ -359,10 +359,10 @@ function readChannels(response) {
 			html += (e.number != undefined ? '<div class="left"><span class="chno round">'+e.number+'</span></div>' : '');
 			html += '<a class="back" target="tvheadend" href="mobile.html"><img class="back" src="images/tvheadend128.png" title="'+l('backToMobileUi')+'" width="50px" /></a>';
 			html += '</div>';
-			if (e.ch_icon != undefined && e.ch_icon != "") 
-				html += '<img id="i_'+e.chid+'" height="'+lh+'px" onclick="showChannel('+e.chid+');" class="channel" src="'+e.ch_icon+'" alt="'+e.name+'" title="'+e.name+'" style="left:0px;top:'+y+'px;" />';
+			if (getIcon(e) != undefined && getIcon(e) != "") 
+				html += '<img id="i_'+e.uuid+'" height="'+lh+'px" onclick="showChannel(\''+e.uuid+'\');" class="channel" src="'+getIcon(e)+'" alt="'+e.name+'" title="'+e.name+'" style="left:0px;top:'+y+'px;" />';
 			else
-				html += '<div id="i_'+e.chid+'" onclick="showChannel('+e.chid+');" class="channel" title="'+e.name+'" style="left:0px;top:'+y+'px;height:'+lh+'px;" />'+e.name+'</div>';
+				html += '<div id="i_'+e.uuid+'" onclick="showChannel(\''+e.uuid+'\');" class="channel" title="'+e.name+'" style="left:0px;top:'+y+'px;height:'+lh+'px;" />'+e.name+'</div>';
 			channelToY[e.name] = y;
 			y+=lh+gap;
 			maxHeight = y;

@@ -59,7 +59,7 @@ function readChannels(response) {
 		var sortNo = e.number!=undefined?e.number:9999;
 		if (channels[sortNo] == undefined) channels[sortNo] = new Array();
 		channels[sortNo][channels[sortNo].length] = e;
-		channelNameToId[e.name] = e.chid;
+		channelNameToId[e.name] = e.uuid;
 	}
 	var channels2 = new Array();
 	for (var i in channels) {
@@ -71,11 +71,11 @@ function readChannels(response) {
 }
 
 function readEpg(response) {
-	var chid = undefined;
+	var uuid = undefined;
 	for (var i in response.entries) {
 		var e = response.entries[i];
-		chid = e.channelid;
-		if (channelToColumn[chid] != undefined) {
+		uuid = channelNameToId[e.channel];
+		if (channelToColumn[uuid] != undefined) {
 			var start = new Date(e.start*1000);
 			var box = start.getHours();
 			while (box % 4 > 0)
@@ -83,7 +83,7 @@ function readEpg(response) {
 			if (box == 0) box = 24;
 			var refDay = new Date(start.getTime()-window.hourOffset*60*60*1000);
 			if (refDay.getDate() == selectedDay.getDate() && refDay.getMonth() == selectedDay.getMonth()) {
-				var td = document.getElementById(box+'_'+window.channelToColumn[e.channelid]); 
+				var td = document.getElementById(box+'_'+window.channelToColumn[uuid]); 
 				var xclass = nvl(e.schedstate);
 				var yclass = (start.getHours() == 20 || start.getHours() == 21)  && e.duration > 60*60 ? 'primetime' : '';
 				var add = e.schedstate != undefined ? '<br />&nbsp;' : '';
@@ -100,8 +100,8 @@ function readEpg(response) {
 	}
 	window.mutex[response.param] = undefined;
 	showCurrent();
-	if (chid)
-		window.lastEpgResponse[chid] = response;
+	if (uuid)
+		window.lastEpgResponse[uuid] = response;
 }
 
 function showCurrent() {
@@ -191,20 +191,20 @@ function initEpg() {
 			var ch = channels[i];
 			if (selectedTag == '' || (','+ch.tags+',').indexOf(','+selectedTag+',') >= 0) {
 				if (cnt-channelOffset >= 0 && cnt-channelOffset < numChannels) {
-					var html = '<div><span class="link" onclick="showHide(\'s_'+(cnt-channelOffset)+'\');">'+image(ch.ch_icon, 'middle',50) + ch.name + '</span>';
+					var html = '<div><span class="link" onclick="showHide(\'s_'+(cnt-channelOffset)+'\');">'+image(getIcon(ch), 'middle',50) + ch.name + '</span>';
 					if (cnt-channelOffset==numChannels-1) {
 						html += '<span class="link" style="float:right;" onclick="pageChannels(+1);">'+icon('images/resultset_next.png')+'</span>';
 					}
-					var streamUrl = window.location.protocol+'//'+window.location.host+'/stream/channelid/'+ch.chid;
+					var streamUrl = window.location.protocol+'//'+window.location.host+'/stream/channel/'+ch.uuid;
 					html += '</div><div id="s_'+(cnt-channelOffset)+'" class="stream">';
 					html += '<div><a target="_blank" href="'+streamUrl+'"><button>HTTP</button></a></div>';
 					html += '<div><a target="_blank" href="buzzplayer://'+streamUrl+'"><button>Buzzplayer</button></a></div></div>';
 					document.getElementById('c_'+(cnt-channelOffset)).innerHTML = html; 
-					channelToColumn[ch.chid] = cnt-channelOffset;
-					if (lastEpgResponse[ch.chid])
-						readEpg(lastEpgResponse[ch.chid]);
+					channelToColumn[ch.uuid] = cnt-channelOffset;
+					if (lastEpgResponse[ch.uuid])
+						readEpg(lastEpgResponse[ch.uuid]);
 					else
-						loadEpgByChannel(ch.name);
+						loadEpgByChannel(ch.uuid);
 				}
 				cnt++;
 			}
@@ -220,6 +220,7 @@ function pageChannels(plus) {
 	channelOffset += plus*numChannels;
 	if (channelOffset < 0) channelOffset = 0;
 	if (channelOffset + numChannels > channels.length) channelOffset = channels.length-numChannels;
+	if (channelOffset < 0) channelOffset = 0;
 	initEpg();
 }
 
@@ -256,7 +257,7 @@ function init() {
 	self.name = 'mag';
 	doPost("confignames", readConfigs, "op=list");
 	loadStandardTable("channeltags", readChannelTags);
-	doPost("channels", readChannels, "op=list");
+	doPost("api/channel/grid", readChannels, "");
 	append('<span style="float:right;"><a href="mobile.html" target="tvheadend"><img width="50px" src="images/tvheadend128.png" title="'+l('backToMobileUi')+'"></a></span><div id="tags"></div><table style="width:100%;"><tr><td style="width:95%;"><div id="date"><span class="link" onclick="pageDate(-1);">'+icon('images/date_previous.png')+'</span><span id="day"></span><span class="link" onclick="pageDate(1);">'+icon('images/date_next.png')+'</span></td><td style="white-space:nowrap;vertical-align:bottom;"><a class="link" onclick="cols(1);">'+icon('images/layout_add.png')+'</a><a class="link" onclick="cols(-1);">'+icon('images/layout_delete.png')+'</a></td></tr></table><table id="epg"></table>');
 	initTable();
 	initEpg();

@@ -157,3 +157,10 @@ function icon(path,align) {
 	else
 		return '';
 }
+
+function getIcon(ch) {
+	if (ch.icon_public_url != undefined && ch.icon_public_url.indexOf("imagecache/") == 0)
+		return "../../"+ch.icon_public_url;
+	else
+		return ch.icon_public_url;
+}

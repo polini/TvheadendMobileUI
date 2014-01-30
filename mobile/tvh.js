@@ -8,6 +8,7 @@ var activeInput = new Array();
 var selectedLink = null;
 var channelIcons = new Array();
 var endTimes = new Array();
+var channelNames = new Array();
 var channelTagsLoaded = false;
 var channelsLoaded = false;
 
@@ -76,14 +77,14 @@ function getAutomaticRecorderForm(e) {
 	divs += '<div class="row"><label>'+l('enabled')+'</label><div id="enabled" class="toggle" onclick="return;" name="enabled" toggled="'+(e.enabled ? 'true' : 'false') + '"><span class="thumb"></span><span class="toggleOn">'+l('yes')+'</span><span class="toggleOff">'+l('no')+'</span></div></div>';
 	divs += '</fieldset>';
 	divs += '<fieldset>';
-	divs += '<div class="row"><label>'+l('channel')+'</label><input type="text" code="' + nvl(e.channel) + '" readonly="readonly" name="channel" value="' + nvl(e.channel) + '" onclick="showSelector(\'channel\', this);" /></div>';
+	divs += '<div class="row"><label>'+l('channel')+'</label><input type="text" code="' + nvl(e.channel) + '" readonly="readonly" name="channel" value="' + nvl(channelNames[e.channel]) + '" onclick="showSelector(\'channel\', this);" /></div>';
 	divs += '<div class="row"><label>'+l('tag')+'</label><input type="text" code="' + nvl(e.tag) + '" readonly="readonly" name="tag" value="' + nvl(e.tag) + '" onclick="showSelector(\'tag\',this);" /></div>';
 	divs += '<div class="row"><label>'+l('genre')+'</label><input type="text" code="'+nvl(e.contenttype)+'" readonly="readonly" name="contenttype" value="' + nvl(contentGroups[e.contenttype]) + '" onclick="showSelector(\'genre\',this);" /></div>';
 	divs += '<div class="row"><label>'+l('config')+'</label><input type="text" code="' + nvl(e.config_name) + '" readonly="readonly" name="config_name" value="' + nvl(e.config_name) + '" onclick="showSelector(\'config\',this);" /></div>';
 	divs += '</fieldset>';
 	divs += '<fieldset>';
 	for (var d=1; d<=7; d++) {
-		divs += '<div class="row"><label>'+longdays[d]+'</label><div class="toggle" onclick="return;" name="enabled" toggled="'+(e.weekdays.indexOf(''+d)>=0) + '"><span class="thumb"></span><span class="toggleOn">'+days[d]+'</span><span class="toggleOff">'+days[d]+'</span></div></div>';
+		divs += '<div class="row"><label>'+longdays[d]+'</label><div class="toggle" onclick="return;" name="enabled" toggled="'+(e.weekdays.join(',').indexOf(''+d)>=0) + '"><span class="thumb"></span><span class="toggleOn">'+days[d]+'</span><span class="toggleOff">'+days[d]+'</span></div></div>';
 	}
 	var starting = e.approx_time == 0 ? l('any') : getTimeFromMinutes(e.approx_time); 
 	divs += '<div class="row"><label>'+l('startingAround')+'</label><input type="text" code="'+nvl(e.approx_time)+'" readonly="readonly" name="startingAround" value="' + starting + '" onclick="showSelector(\'starting\',this);" /></div>';
@@ -175,10 +176,10 @@ function saveAutomaticRecorder(id) {
 	entries[0].enabled = form.getElementsByClassName('toggle')[0].getAttribute('toggled') == "true";
 	entries[0].tag = form.tag.getAttribute('code');
 	entries[0].channel = form.channel.getAttribute('code');
-	entries[0].weekdays = '';
+	entries[0].weekdays = new Array();
 	for (var i=1; i<=7; i++) {
 		if (form.getElementsByClassName('toggle')[i].getAttribute('toggled') == "true")
-			entries[0].weekdays += (entries[0].weekdays.length > 0 ? ',' : '') + i; 
+			entries[0].weekdays[i] = i; 
 	}
 	entries[0].contenttype = form.contenttype.getAttribute('code');
 	entries[0].config_name = form.config_name.getAttribute('code');
@@ -259,7 +260,7 @@ function readAdapters(response) {
 }
 
 function loadSubscriptions() {
-	doGet('subscriptions', readSubscriptions);
+	doGet('api/status/subscriptions', readSubscriptions);
 }
 
 function loadAdapters() {
@@ -418,17 +419,17 @@ function showChannelInfos(tag) {
 	var as = document.getElementById('tag_'+tag).getElementsByTagName('A');
 	for (var i in as) {
 		if (as[i].tagName != undefined && as[i].tagName.toLowerCase() == 'a') {
-			var chid = as[i].getAttribute('href').replace("#channel_", "");
+			var uuid = as[i].getAttribute('href').replace("#channel_", "");
 			var imgs = as[i].getElementsByClassName('icon');
-			if (imgs.length > 0 && channelIcons[chid] != undefined && imgs[0].src != channelIcons[chid]) {
-				imgs[0].src = channelIcons[chid];
+			if (imgs.length > 0 && channelIcons[uuid] != undefined && imgs[0].src != channelIcons[uuid]) {
+				imgs[0].src = channelIcons[uuid];
 			}
 			var curr = as[i].getElementsByClassName('small');
 			if (curr.length > 0) {
 				var html = '';
-				if (current[chid] != undefined) {
-					for (var i in current[chid]) {
-						var e = current[chid][i];
+				if (current[uuid] != undefined) {
+					for (var i in current[uuid]) {
+						var e = current[uuid][i];
 						if (new Date() > new Date(e.start*1000) && new Date() <= new Date((e.start+e.duration)*1000)) {
 							html += layoutFormat(e, 'current');
 							break;
@@ -445,7 +446,7 @@ function reloadChannelEpg(channel) {
 	for (var i in channels) {	
 		var e = channels[i];
 		if (e.name == channel) {
-			loadEpg(e.chid, channel, true);
+			loadEpg(e.uuid, channel, true);
 			break;
 		}
 	}
@@ -454,7 +455,7 @@ function reloadChannelEpg(channel) {
 function reloadChannelIdEpg(channel) {
 	for (var i in channels) {	
 		var e = channels[i];
-		if (e.chid == channel) {
+		if (e.uuid == channel) {
 			loadEpg(channel, e.name, true);
 			break;
 		}
@@ -557,8 +558,9 @@ function readChannels(response) {
 	for (var i in response.entries) {
 		var e = response.entries[i];
 		var no = e.number != undefined ? '<span class="chno round">'+e.number+'</span>' : '';
-		window.channelIcons[e.chid] = e.ch_icon;
-		html = '<li><a href="#channel_' + e.chid + '" onclick="loadEpg('+e.chid+', \''+e.name+'\', true);">';
+		window.channelNames[e.uuid] = e.name;
+		window.channelIcons[e.uuid] = getIcon(e);
+		html = '<li><a href="#channel_' + e.uuid + '" onclick="loadEpg(\''+e.uuid+'\', \''+e.name+'\', true);">';
 		html += imageClass('images/pb_trans.png', 'icon') + no + e.name + '<div class="small"></div></a></li>';
 		var sortNo = e.number!=undefined?e.number:9999;
 		var tags = ("0,"+e.tags).split(",");
@@ -570,14 +572,14 @@ function readChannels(response) {
 			}
 		}
 		if (sel[sortNo] == undefined) sel[sortNo] = '';
-		app += '<ul id="channel_'+e.chid+'" title="'+e.name+'"><li>'+l('loading')+'</li></ul>';
-		app += '<form class="panel" id="live_'+e.chid+'" title="'+e.name+'">';
-		var streamUrl = window.location.protocol+'//'+window.location.host+'/stream/channelid/'+e.chid;
+		app += '<ul id="channel_'+e.uuid+'" title="'+e.name+'"><li>'+l('loading')+'</li></ul>';
+		app += '<form class="panel" id="live_'+e.uuid+'" title="'+e.name+'">';
+		var streamUrl = window.location.protocol+'//'+window.location.host+'/stream/channel/'+e.uuid;
 		app += '<h1>'+l('liveTv')+'</h1><p>'+streamUrl+'</p>';
 		app += '<a target="_blank" href="'+streamUrl+'" class="whiteButton">'+streamUrl+'</a>';
 		app += '<a target="_blank" href="buzzplayer://'+streamUrl+'" class="whiteButton">Buzzplayer</a>';
 		app += '</form>';
-		sel[sortNo] += '<li><a href="javascript:" code="'+e.name+'" onclick="selectItem(\'channel\',this);">'+e.name+'</a></li>';
+		sel[sortNo] += '<li><a href="javascript:" code="'+e.uuid+'" onclick="selectItem(\'channel\',this);">'+e.name+'</a></li>';
 	}
 	for (var i in tagHtml) {
 		var tagch = '<li><a href="epg.html?'+i+'" target="epg">'+icon('images/timeline.png')+l('timeline')+'</a></li><li><a href="mag.html?'+i+'" target="mag">'+icon('images/book_open.png')+l('magazine')+'</a></li><li class="group">'+l('channels')+'</li>';
@@ -632,20 +634,20 @@ var lastSearch = '';
 function readEpg(response) {
 	var html = '';
 	var ins = '';
-	var chid = response.param;
-	if (endTimes[chid] == undefined)
-		endTimes[chid] = new Array();
+	var uuid = response.param;
+	if (endTimes[uuid] == undefined)
+		endTimes[uuid] = new Array();
 	if (response.entries.length > 0) {
 		for (var i in response.entries) {
 			var e = response.entries[i];
-			if (endTimes[chid][e.end] == undefined)
-				endTimes[chid][e.end] = 1;
+			if (endTimes[uuid][e.end] == undefined)
+				endTimes[uuid][e.end] = 1;
 			else
-				endTimes[chid][e.end]++;
+				endTimes[uuid][e.end]++;
 			var day = getDateFromTimestamp(e.start, true);
-			if (lastEpgDay[chid] == undefined || lastEpgDay[chid] != day) {
+			if (lastEpgDay[uuid] == undefined || lastEpgDay[uuid] != day) {
 				html += '<li class="group">'+day+'</li>';
-				lastEpgDay[chid] = day;
+				lastEpgDay[uuid] = day;
 			}
 			var epg = '';
 			if (e.schedstate == 'scheduled')
@@ -656,25 +658,25 @@ function readEpg(response) {
 				epg += icon('../icons/television.png', '(completed)');
 			else if (e.schedstate == 'recordingError' || e.schedstate == 'completedError')
 				epg += icon('../icons/exclamation.png', '(error)');
-			epg += layoutFormat(e, chid == 's' ? 'search' : 'epg');
+			epg += layoutFormat(e, uuid == 's' ? 'search' : 'epg');
 			html += '<li><a href="#epg_'+e.id+'">' + epg + '</a></li>';
 			ins += getEpgForm(e);
 		}
-		if (response.totalCount > epgLoaded[chid])
-			html += '<li class="noBgImage"><a class="more" href="javascript:loadEpg(\''+chid+'\', \''+response.entries[0].channel+'\', false);">'+l('getMore')+'</a></li>';
-		var ch = document.getElementById('channel_'+chid);
-		if (chid == 's')
+		if (response.totalCount > epgLoaded[uuid])
+			html += '<li class="noBgImage"><a class="more" href="javascript:loadEpg(\''+uuid+'\', \''+response.entries[0].channel+'\', false);">'+l('getMore')+'</a></li>';
+		var ch = document.getElementById('channel_'+uuid);
+		if (uuid == 's')
 			ch = document.getElementById('search');
 		else if (ch.childNodes.length == 1) {
-			html = '<li class="noBgImage"><a href="#live_'+chid+'" class="live">'+icon('../icons/control_play.png')+l('liveTv')+'</a></li>' + html;
+			html = '<li class="noBgImage"><a href="#live_'+uuid+'" class="live">'+icon('../icons/control_play.png')+l('liveTv')+'</a></li>' + html;
 		}
 		ch.childNodes[ch.childNodes.length-1].outerHTML = '';
 		ch.innerHTML += html;
 		append(ins);
 	}
 	else {
-		var ch = document.getElementById('channel_'+chid);
-		if (chid == 's')
+		var ch = document.getElementById('channel_'+uuid);
+		if (uuid == 's')
 			ch = document.getElementById('search');
 		ch.childNodes[ch.childNodes.length-1].outerHTML = '';
 	}
@@ -682,31 +684,31 @@ function readEpg(response) {
 
 var epgLoaded = new Array();
 var lastEpgDay = new Array();
-function loadEpg(chid, chname, reload) {
-	var start = epgLoaded[chid] != undefined ? epgLoaded[chid] : 0;
+function loadEpg(uuid, chname, reload) {
+	var start = epgLoaded[uuid] != undefined ? epgLoaded[uuid] : 0;
 	var limit = 20;
 	if (reload) {
 		limit = start;
 		start=0;
 		if (limit == 0) limit = 20;
-		var ch = document.getElementById('channel_'+chid);
+		var ch = document.getElementById('channel_'+uuid);
 		ch.innerHTML = '<li>'+l('loading')+'</li>';
-		lastEpgDay[chid] = undefined;
+		lastEpgDay[uuid] = undefined;
 	}
-	if (endTimes[chid] == undefined)
-		endTimes[chid] = new Array();
-	for (var i in endTimes[chid]) {
+	if (endTimes[uuid] == undefined)
+		endTimes[uuid] = new Array();
+	for (var i in endTimes[uuid]) {
 		if (i < new Date()/1000)
-			start -= endTimes[chid][i];
+			start -= endTimes[uuid][i];
 	}
-	endTimes[chid] = new Array();
+	endTimes[uuid] = new Array();
 	if (start < 0)
 		start = 0;
 	var params = 'start='+start+'&limit='+limit+'&channel='+encodeURIComponent(chname);
-	if (chid == 's')
+	if (uuid == 's')
 		params = 'start='+start+'&limit='+limit+'&title='+encodeURIComponent(lastSearch);
-	epgLoaded[chid] = start+limit;
-	doPostWithParam("epg", readEpg, params, chid);
+	epgLoaded[uuid] = start+limit;
+	doPostWithParam("epg", readEpg, params, uuid);
 }
 
 function readCurrent(response) {
@@ -738,7 +740,7 @@ function newAutomaticRecorder() {
 	add.title = '';
 	add.creator = '';
 	add.comment = '';
-	add.weekdays = '1,2,3,4,5,6,7';
+	add.weekdays = new Array(1,2,3,4,5,6,7);
 	add.enabled = true;
 	add.prio = 'normal';
 	add.approx_time  = '0';
@@ -749,19 +751,19 @@ function readAutomaticRecorderList(response) {
 	var list = document.getElementById('ar');
 	var html = '';
 	var divs = '';
-	html += '<li><a href="#ar_new">'+icon('../icons/add.gif','')+l('newEntry')+'</a></li>';
+	html += '<li><a href="#ar_new">'+icon('../icons/add.png','')+l('newEntry')+'</a></li>';
 	divs += getAutomaticRecorderForm(newAutomaticRecorder());
 	for (var i in response.entries) {	
 		var e = response.entries[i];
 		var info = '';
 		info += plusMinus(e.pri);
-		info += e.channel ? (info.length > 0 ? ' ' : '') + e.channel : '';
+		info += e.channel ? (info.length > 0 ? ' ' : '') + window.channelNames[e.channel] : '';
 		info += e.tag ? (info.length > 0 ? ' &mdash; ' : '') + e.tag : '';
 		info += e.contenttype ? (info.length > 0 ? ' &mdash; ' : '') + contentGroups[e.contenttype] : '';
 		info += e.config_name ? (info.length > 0 ? ' &mdash; ' : '') + e.config_name : '';
 		info += e.approx_time != '' ? (info.length > 0 ? ' &mdash; ' : '') + getTimeFromMinutes(e.approx_time) : '';
-		if (e.weekdays != '1,2,3,4,5,6,7') {
-			var wds = e.weekdays;
+		if (e.weekdays != undefined && e.weekdays.length < 7) {
+			var wds = e.weekdays.join(',');
 			for (var d=1; d<=7; d++) {
 				wds = wds.replace(d, days[d]);
 			}
@@ -814,7 +816,7 @@ function initialLoad() {
 	channelTagsLoaded = false;
 	channelsLoaded = false;
 	loadStandardTable("channeltags", readChannelTags);
-	doPost("channels", readChannels, "op=list");
+	doPost("api/channel/grid", readChannels, "");
 	loadCurrent();
 	loadRecordings('upcoming', true);
 }
@@ -834,8 +836,8 @@ function reload(initial) {
 				showInitialPage('ar');
 		}
 		if (location.hash.indexOf('#_channel_') == 0) {
-			var chid = location.hash.replace('#_channel_', '');
-			reloadChannelIdEpg(chid);
+			var uuid = location.hash.replace('#_channel_', '');
+			reloadChannelIdEpg(uuid);
 		}
 		if (location.hash.indexOf('#_epg_') == 0) {
 			var panel = document.getElementById(location.hash.replace('#_', ''));
