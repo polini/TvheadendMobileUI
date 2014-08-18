@@ -278,7 +278,7 @@ function readChannelTags(response) {
 		var e = response.entries[i];
 		window.channelTags[e.id] = e.name;
 		html[e.id] = '<li><a href="#tag_'+e.id+'" onclick="showChannelInfos('+e.id+');">';
-		html[e.id] += image(e.icon) + e.name+'</a></li>';
+		html[e.id] += image(e.icon, undefined, undefined, window.blackLogo) + e.name+'</a></li>';
 		ins += '<ul id="tag_'+e.id+'" title="'+e.name+'"></ul>';
 		sel[e.id] = '<li><a href="javascript:" code="'+e.name+'" onclick="selectItem(\'tag\',this);">'+e.name+'</a></li>';
 	}
@@ -540,7 +540,7 @@ function loadRecordings(which, reload) {
 
 function imageClass(url, id) {
 	if (url)
-		return '<img class="'+id+'" src="'+url+'" align="top" width="35px" />';
+		return '<img class="'+id+(windows.blackLogo ? ' black':'')+'" src="'+url+'" align="top" width="35px" />';
 	else
 		return '';
 }

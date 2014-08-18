@@ -360,7 +360,7 @@ function readChannels(response) {
 			html += '<a class="back" target="tvheadend" href="mobile.html"><img class="back" src="images/tvheadend128.png" title="'+l('backToMobileUi')+'" width="50px" /></a>';
 			html += '</div>';
 			if (getIcon(e) != undefined && getIcon(e) != "") 
-				html += '<img id="i_'+e.uuid+'" height="'+lh+'px" onclick="showChannel(\''+e.uuid+'\');" class="channel" src="'+getIcon(e)+'" alt="'+e.name+'" title="'+e.name+'" style="left:0px;top:'+y+'px;" />';
+				html += '<img id="i_'+e.uuid+'" height="'+lh+'px" onclick="showChannel(\''+e.uuid+'\');" class="channel'+(window.blackLogo?' black':'')+'" src="'+getIcon(e)+'" alt="'+e.name+'" title="'+e.name+'" style="left:0px;top:'+y+'px;" />';
 			else
 				html += '<div id="i_'+e.uuid+'" onclick="showChannel(\''+e.uuid+'\');" class="channel" title="'+e.name+'" style="left:0px;top:'+y+'px;height:'+lh+'px;" />'+e.name+'</div>';
 			channelToY[e.name] = y;
