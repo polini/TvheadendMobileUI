@@ -191,7 +191,7 @@ function initEpg() {
 			var ch = channels[i];
 			if (selectedTag == '' || (','+ch.tags+',').indexOf(','+selectedTag+',') >= 0) {
 				if (cnt-channelOffset >= 0 && cnt-channelOffset < numChannels) {
-					var html = '<div><span class="link" onclick="showHide(\'s_'+(cnt-channelOffset)+'\');">'+image(ch.ch_icon, 'middle',50) + ch.name + '</span>';
+					var html = '<div><span class="link" onclick="showHide(\'s_'+(cnt-channelOffset)+'\');">'+image(ch.ch_icon, 'middle',50,window.blackLogo) + ch.name + '</span>';
 					if (cnt-channelOffset==numChannels-1) {
 						html += '<span class="link" style="float:right;" onclick="pageChannels(+1);">'+icon('images/resultset_next.png')+'</span>';
 					}

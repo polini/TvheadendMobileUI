@@ -113,3 +113,7 @@ body>ul.selector>li.selected>a {
 	margin: 0 0 4px 4px;
 	text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.75);
 }
+
+img.icon.black {
+	background-color:black;
+}

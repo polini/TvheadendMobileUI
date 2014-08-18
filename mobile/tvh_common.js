@@ -141,11 +141,12 @@ function doGet(path, callback) {
 	http.send(null);
 }
 
-function image(url, align, size) {
+function image(url, align, size, black) {
 	var s = size != undefined ? size : 35;
 	var a = align != undefined ? align : 'top';
+	var b = (black != undefined && black == true) ? ' style="background-color:black;"' : '';
 	if (url)
-		return '<img src="'+url+'" align="'+a+'" width="'+s+'px" />';
+		return '<img'+b+' src="'+url+'" align="'+a+'" width="'+s+'px" />';
 	else
 		return '';
 }

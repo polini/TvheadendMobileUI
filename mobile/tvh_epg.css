@@ -280,6 +280,10 @@ div.channel {
     width: auto;
 }
 
+img.channel.black {
+	background-color:black;
+}
+
 div.channel {
 	font-family: Arial;
 	text-shadow: 1px 1px 0px #ccc;
