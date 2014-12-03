@@ -110,7 +110,6 @@ function showCurrent() {
 }
 
 function cancel(id, dvrUuid, channel) {
-	cancelRecordingId = id;
 	var entries = new Array();
 	entries[0] = dvrUuid;
 	var params = "uuid="+JSON.stringify(entries);
