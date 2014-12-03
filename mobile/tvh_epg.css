@@ -13,6 +13,10 @@ div#logos {
     z-index: 6;
 }
 
+div#logos.black {
+	background-color: black;
+}
+
 div.ct_16 { background-color: #e0e0e0!important; }
 div.ct_16 div.bgimage{ background:url(images/movies.png) no-repeat right top; }
 div.ct_32 { background-color: #EFE8AD!important; }

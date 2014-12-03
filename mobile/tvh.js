@@ -1,5 +1,5 @@
-var priorities = new Array('important', 'high', 'normal', 'low', 'unimportant');
-var plusMinusSigns = new Array('⊕⊕', '⊕', '', '⊖', '⊖⊖');
+var priorities = new Array('important', 'high', 'normal', 'low', 'unimportant', 'notset');
+var plusMinusSigns = new Array('⊕⊕', '⊕', '⊙', '⊖', '⊖⊖', '⊗');
 var contentGroups = new Array();
 var configs = new Array();
 var channelTags = new Array();
@@ -16,21 +16,21 @@ function layoutFormat(e, type) {
 	var ret = layout[type];
 	if (e.title == e.subtitle)
 		e.subtitle = undefined;
-	ret = ret.replace(/%ti/g, nvl(e.title));
+	ret = ret.replace(/%ti/g, nvl(e.disp_title ? e.disp_title : e.title));
 	ret = ret.replace(/%ds_su/g, nvl(e.subtitle) != '' ? ' &mdash; '+e.subtitle : '');
 	ret = ret.replace(/%su/g, nvl(e.subtitle));
-	ret = ret.replace(/%ch/g, nvl(e.channel));
+	ret = ret.replace(/%ch/g, nvl(e.channelname ? e.channelname : e.channelName));
 	ret = ret.replace(/%ds_ep/g, nvl(e.episode) != '' ? ' &mdash; '+e.episode : '');
 	ret = ret.replace(/%ep/g, nvl(e.episode));
 	var percent = 0;
-	if (e.duration > 0)
-		percent = Math.round((((new Date()).getTime()/1000)-e.start)/(e.duration)*100);
+	if (e.stop > 0 && e.stop > e.start)
+		percent = Math.round((((new Date()).getTime()/1000)-e.start)/(e.stop-e.start)*100);
 	ret = ret.replace(/%pb/g, getProgressBar(200, percent));
 	ret = ret.replace(/%st/g, getTimeFromTimestamp(e.start));
 	ret = ret.replace(/%sdt/g, getDateTimeFromTimestamp(e.start, true));
-	ret = ret.replace(/%et/g, getTimeFromTimestamp(e.end));
-	ret = ret.replace(/%edt/g, getDateTimeFromTimestamp(e.end, true));
-	ret = ret.replace(/%du/g, getDuration(e.duration)+l('hour.short'));
+	ret = ret.replace(/%et/g, getTimeFromTimestamp(e.stop));
+	ret = ret.replace(/%edt/g, getDateTimeFromTimestamp(e.stop, true));
+	ret = ret.replace(/%du/g, getDuration(e.stop-e.start)+l('hour.short'));
 	ret = ret.replace(/%pr/g, plusMinus(e.pri));
 	ret = ret.replace(/%ds/g, ' &mdash; ');
 	ret = ret.replace(/%br/g, '<br />');
@@ -39,7 +39,7 @@ function layoutFormat(e, type) {
 
 function plusMinus(prio) {
 	for (var i in priorities) {
-		if (priorities[i] == prio)
+		if (priorities[i] == prio || i == prio)
 			return '<span class="plusminus">'+plusMinusSigns[i]+'</span>';
 	}
 	return '';
@@ -78,32 +78,32 @@ function getAutomaticRecorderForm(e) {
 	divs += '</fieldset>';
 	divs += '<fieldset>';
 	divs += '<div class="row"><label>'+l('channel')+'</label><input type="text" code="' + nvl(e.channel) + '" readonly="readonly" name="channel" value="' + nvl(channelNames[e.channel]) + '" onclick="showSelector(\'channel\', this);" /></div>';
-	divs += '<div class="row"><label>'+l('tag')+'</label><input type="text" code="' + nvl(e.tag) + '" readonly="readonly" name="tag" value="' + nvl(e.tag) + '" onclick="showSelector(\'tag\',this);" /></div>';
-	divs += '<div class="row"><label>'+l('genre')+'</label><input type="text" code="'+nvl(e.contenttype)+'" readonly="readonly" name="contenttype" value="' + nvl(contentGroups[e.contenttype]) + '" onclick="showSelector(\'genre\',this);" /></div>';
-	divs += '<div class="row"><label>'+l('config')+'</label><input type="text" code="' + nvl(e.config_name) + '" readonly="readonly" name="config_name" value="' + nvl(e.config_name) + '" onclick="showSelector(\'config\',this);" /></div>';
+	divs += '<div class="row"><label>'+l('tag')+'</label><input type="text" code="' + nvl(e.tag) + '" readonly="readonly" name="tag" value="' + nvl(window.channelTags[e.tag]) + '" onclick="showSelector(\'tag\',this);" /></div>';
+	divs += '<div class="row"><label>'+l('genre')+'</label><input type="text" code="'+nvl(e.content_type)+'" readonly="readonly" name="contenttype" value="' + nvl(contentGroups[e.content_type]) + '" onclick="showSelector(\'genre\',this);" /></div>';
+	divs += '<div class="row"><label>'+l('config')+'</label><input type="text" code="' + nvl(e.config_name) + '" readonly="readonly" name="config_name" value="' + nvl(configNames[e.config_name]) + '" onclick="showSelector(\'config\',this);" /></div>';
 	divs += '</fieldset>';
 	divs += '<fieldset>';
 	for (var d=1; d<=7; d++) {
 		divs += '<div class="row"><label>'+longdays[d]+'</label><div class="toggle" onclick="return;" name="enabled" toggled="'+(e.weekdays.join(',').indexOf(''+d)>=0) + '"><span class="thumb"></span><span class="toggleOn">'+days[d]+'</span><span class="toggleOff">'+days[d]+'</span></div></div>';
 	}
-	var starting = e.approx_time == 0 ? l('any') : getTimeFromMinutes(e.approx_time); 
-	divs += '<div class="row"><label>'+l('startingAround')+'</label><input type="text" code="'+nvl(e.approx_time)+'" readonly="readonly" name="startingAround" value="' + starting + '" onclick="showSelector(\'starting\',this);" /></div>';
-	divs += '<div class="row"><label>'+l('priority')+'</label><input type="text" code="'+nvl(e.pri)+'" readonly="readonly" name="priority" value="' + (e.pri != undefined ? l('prio.'+e.pri) : '') + '" onclick="showSelector(\'priority\',this);" /></div>';
+	var starting = e.start;
+	divs += '<div class="row"><label>'+l('startingAround')+'</label><input type="text" code="'+nvl(e.start)+'" readonly="readonly" name="startingAround" value="' + starting + '" onclick="showSelector(\'starting\',this);" /></div>';
+	divs += '<div class="row"><label>'+l('priority')+'</label><input type="text" code="'+nvl(e.pri)+'" readonly="readonly" name="priority" value="' + (e.pri != undefined ? l('prio.'+priorities[e.pri]) : '') + '" onclick="showSelector(\'priority\',this);" /></div>';
 	divs += '</fieldset>';
 	divs += '<fieldset>';
 	divs += '<div class="row"><label>'+l('createdBy')+'</label><input type="text" name="creator" value="' + nvl(e.creator) + '" /></div>';
 	divs += '<div class="row"><label>'+l('comment')+'</label><input type="text" name="comment" value="' + nvl(e.comment) + '" /></div>';
 	divs += '</fieldset>';
-	divs += '<a class="whiteButton" href="javascript:saveAutomaticRecorder(\''+e.id+'\');">'+l('save')+'</a>';
+	divs += '<a class="whiteButton" href="javascript:saveAutomaticRecorder(\''+e.uuid+'\');">'+l('save')+'</a>';
 	if (e.id != 'new') {
-		divs += '<p>&nbsp;</p><a class="redButton" href="javascript:deleteAutomaticRecorder(\''+e.id+'\');">'+l('delete')+'</a>';
+		divs += '<p>&nbsp;</p><a class="redButton" href="javascript:deleteAutomaticRecorder(\''+e.uuid+'\');">'+l('delete')+'</a>';
 	}
 	if (document.getElementById('ar_'+e.id) != null) {
 		document.getElementById('ar_'+e.id).innerHTML = divs;
 		return '';
 	}
 	else {
-		return '<form id="ar_' + e.id + '" title="' + nvl(e.title) + '" class="panel">' + divs + '</form>';
+		return '<form id="ar_' + e.uuid + '" title="' + nvl(e.title) + '" class="panel">' + divs + '</form>';
 	}
 }
 
@@ -142,11 +142,7 @@ function getProgressBar(width, percent) {
 function readSaveAutomaticRecorder(response) {
 	loadAutomaticRecorderList();
 	iui.goBack();
-}
-
-function createAutomaticRecorder(response) {
-	document.getElementById('ar_new').id = 'ar_'+response.id;
-	saveAutomaticRecorder(response.id);
+	document.getElementById('ar_new').outerHTML = getAutomaticRecorderForm(newAutomaticRecorder());
 }
 
 function readDeleteAutomaticRecorder(response) {
@@ -158,20 +154,17 @@ function deleteAutomaticRecorder(id) {
 	if (confirm(l('reallyDeleteItem'))) {
 		var entries = new Array();
 		entries[0] = id;
-		var params = "entries="+JSON.stringify(entries)+"&op=delete&table=autorec";
-		doPost("tablemgr", readDeleteAutomaticRecorder, params);
+		var params = "uuid="+JSON.stringify(entries);
+		doPost("api/idnode/delete", readDeleteAutomaticRecorder, params);
 	}
 }
 
 function saveAutomaticRecorder(id) {
-	if (id == 'new') {
-		doPost("tablemgr", createAutomaticRecorder, "op=create&table=autorec");
-		return;
-	}
 	var form = document.getElementById('ar_'+id);
 	var entries = new Array();
 	entries[0] = new Object();
-	entries[0].id = id;
+	if (id != 'new')
+		entries[0].uuid = id;
 	entries[0].title = form.titel.value;
 	entries[0].enabled = form.getElementsByClassName('toggle')[0].getAttribute('toggled') == "true";
 	entries[0].tag = form.tag.getAttribute('code');
@@ -181,14 +174,14 @@ function saveAutomaticRecorder(id) {
 		if (form.getElementsByClassName('toggle')[i].getAttribute('toggled') == "true")
 			entries[0].weekdays[i] = i; 
 	}
-	entries[0].contenttype = form.contenttype.getAttribute('code');
+	entries[0].content_type = form.contenttype.getAttribute('code');
 	entries[0].config_name = form.config_name.getAttribute('code');
-	entries[0].approx_time = form.startingAround.getAttribute('code');
+	entries[0].start = form.startingAround.getAttribute('code');
 	entries[0].pri = form.priority.getAttribute('code');
 	entries[0].creator = form.creator.value;
 	entries[0].comment = form.comment.value;
-	var params = "entries="+JSON.stringify(entries)+"&op=update&table=autorec";
-	doPost("tablemgr", readSaveAutomaticRecorder, params);
+	var params = (id=="new"?"conf="+JSON.stringify(entries[0]):"node="+JSON.stringify(entries));
+	doPost((id=="new"?"api/dvr/autorec/create":"api/idnode/save"), readSaveAutomaticRecorder, params);
 }
 
 function loadAbout() {
@@ -209,8 +202,8 @@ function readContentGroups(response) {
 	var sel = '';
 	for (var i=0; i<response.entries.length; i++) {	
 		var e = response.entries[i];
-		window.contentGroups[e.code] = e.name;
-		sel += '<li><a href="javascript:" code="'+e.code+'" onclick="selectItem(\'genre\',this);">'+(e.name?e.name:'&nbsp;')+'</a></li>';
+		window.contentGroups[e.key] = e.val;
+		sel += '<li><a href="javascript:" code="'+e.key+'" onclick="selectItem(\'genre\',this);">'+(e.val?e.val:'&nbsp;')+'</a></li>';
 	}
 	document.getElementById('genreSelector').innerHTML = sel;
 }
@@ -224,10 +217,12 @@ function readDiskspace(response) {
 
 function readConfigs(response) {
 	window.configs = response.entries;
+	window.configNames = new Array();
 	var sel='';
 	for (i in response.entries) {
 		var e = response.entries[i];
-		sel += '<li><a href="javascript:" code="'+e.identifier+'" onclick="selectItem(\'config\',this);">'+e.name+'</a></li>';
+		sel += '<li><a href="javascript:" code="'+e.key+'" onclick="selectItem(\'config\',this);">'+e.val+'</a></li>';
+		window.configNames[e.key] = e.val;
 	}
 	document.getElementById('configSelector').innerHTML = sel;
 }
@@ -264,23 +259,23 @@ function loadSubscriptions() {
 }
 
 function loadAdapters() {
-	doGet('tv/adapter', readAdapters);
+	doPost('api/hardware/tree', readAdapters, "uuid=root");
 }
 
 function readChannelTags(response) {
 	var html = new Array();
-	html[0] = '<li><a href="#tag_0" onclick="showChannelInfos(0);">'+l('allChannels')+'</a></li>';
+	html[0] = '<li><a href="#tag_0" onclick="showChannelInfos(\'0\');">'+l('allChannels')+'</a></li>';
 	var ins = '';
 	ins += '<ul id="tag_0" title="'+l('allChannels')+'"></ul>';
 	var sel = new Array();
 	sel[0] = '<li><a href="javascript:" code="" onclick="selectItem(\'tag\',this);">'+l('any')+'</a></li>';
 	for (var i=0; i<response.entries.length; i++) {	
 		var e = response.entries[i];
-		window.channelTags[e.id] = e.name;
-		html[e.id] = '<li><a href="#tag_'+e.id+'" onclick="showChannelInfos('+e.id+');">';
-		html[e.id] += image(e.icon, undefined, undefined, window.blackLogo) + e.name+'</a></li>';
-		ins += '<ul id="tag_'+e.id+'" title="'+e.name+'"></ul>';
-		sel[e.id] = '<li><a href="javascript:" code="'+e.name+'" onclick="selectItem(\'tag\',this);">'+e.name+'</a></li>';
+		window.channelTags[e.uuid] = e.name;
+		html[e.uuid] = '<li><a href="#tag_'+e.uuid+'" onclick="showChannelInfos(\''+e.uuid+'\');">';
+		html[e.uuid] += image(e.icon, undefined, undefined, window.blackLogo) + e.name+'</a></li>';
+		ins += '<ul id="tag_'+e.uuid+'" title="'+e.name+'"></ul>';
+		sel[e.uuid] = '<li><a href="javascript:" code="'+e.name+'" onclick="selectItem(\'tag\',this);">'+e.name+'</a></li>';
 	}
 	var all = '';
 	for (var i in html)
@@ -297,26 +292,24 @@ function readChannelTags(response) {
 function getRecordingForm(e, type) {
 	var divs = getIntro(e);
 	divs += '<fieldset>';
-	divs += textField('episode', e.episode, true);
-	divs += textField('channel', e.channel, true);
-	divs += textField('priority', (e.pri != undefined ? l('prio.'+e.pri) : ''), true);
+	divs += textField('episode', e.episodeOnscreen, true);
+	divs += textField('channel', e.channelname, true);
+	divs += textField('priority', (e.pri != undefined ? l('prio.'+priorities[e.pri]) : ''), true);
 	divs += textField('start', getDateTimeFromTimestamp(e.start, true), true);
-	divs += textField('end', getDateTimeFromTimestamp(e.start+e.duration, true), true);
+	divs += textField('end', getDateTimeFromTimestamp(e.stop, true), true);
 	divs += textField('duration', getDuration(e.duration)+l('hour.short'), true);
-	divs += textField('config', e.config_name, true);
+	divs += textField('config', configNames[e.config_name], true);
 	var status = l('status.'+e.status)!='status.'+e.status ? l('status.'+e.status) : e.status;
 	divs += textField('status', status, true);
 	divs += '</fieldset>';
-	if (e.schedstate == 'scheduled' || e.schedstate == 'recording')
-		divs += '<a class="redButton" href="javascript:cancelEntry('+e.id+', \''+type+'\');">'+l('cancel')+'</a>';
-	else if (type == 'failed')
-		divs += '<a class="redButton" href="javascript:deleteEntry('+e.id+', \''+type+'\');">'+l('delete')+'</a>';
-	if (document.getElementById('rec_'+e.id) != null) {
-		document.getElementById('rec_'+e.id).innerHTML = divs;
+	if (e.sched_status == 'scheduled' || e.sched_status == 'recording' || type == 'failed')
+		divs += '<a class="redButton" href="javascript:deleteEntry(\''+e.uuid+'\', \''+type+'\');">'+l('delete')+'</a>';
+	if (document.getElementById('rec_'+e.uuid) != null) {
+		document.getElementById('rec_'+e.uuid).innerHTML = divs;
 		return '';
 	}
 	else {
-		return '<form id="rec_' + e.id + '" title="' + e.title + '" class="panel">' + divs + '</form>';
+		return '<form id="rec_' + e.uuid + '" title="' + (e.disp_title ? e.disp_title : e.title) + '" class="panel">' + divs + '</form>';
 	}
 }
 
@@ -364,55 +357,53 @@ function textField(labelKey, value, readonly) {
 
 function getIntro(e) {
 	var divs = '';
-	if (e.chicon != undefined)
-		divs += '<img src="'+e.chicon+'" width="80px" align="right" />';
-	divs += '<h1>'+e.title+'</h1>';
-	if (e.subtitle != undefined)
+	var ch = e.channelUuid ? e.channelUuid : e.channel;
+	if (ch != undefined && channelIcons[ch] != undefined)
+		divs += '<img class="'+(window.blackLogo ? ' black':'')+'" src="'+channelIcons[e.channelUuid ? e.channelUuid : e.channel]+'" width="80px" align="right" />';
+	divs += '<h1>'+(e.disp_title ? e.disp_title : e.title)+'</h1>';
+	if (e.disp_subtitle != undefined)
+		divs += '<h2>'+e.disp_subtitle+'</h2>';
+	else if (e.subtitle != undefined)
 		divs += '<h2>'+e.subtitle+'</h2>';
-	divs += '<p class="description">'+nvl(e.description)+'</p><div style="clear:both;height:1px;"></div>';
+	divs += '<p class="description">'+nvl(e.disp_description ? e.disp_description : e.description)+'</p><div style="clear:both;height:1px;"></div>';
 	return divs;
 }
 
 function getEpgForm(e) {
 	var divs = getIntro(e);
 	divs += '<fieldset>';
-	divs += textField('episode', e.episode, true);
-	divs += textField('channel', e.channel, true);
+	divs += textField('episode', e.episodeOnscreen, true);
+	divs += textField('channel', e.channelName, true);
 	divs += textField('start', getDateTimeFromTimestamp(e.start, true), true);
-	divs += textField('end', getDateTimeFromTimestamp(e.start+e.duration, true), true);
-	divs += textField('duration', getDuration(e.duration)+l('hour.short'), true);
+	divs += textField('end', getDateTimeFromTimestamp(e.stop, true), true);
+	divs += textField('duration', getDuration(e.stop-e.start)+l('hour.short'), true);
 	divs += textField('genre', contentGroups[e.contenttype], true);
-	if (e.schedstate != "") {
-		divs += textField('status', contentGroups[e.schedstate], true);
+	if (e.dvrState != "") {
+		divs += textField('status', l('status.'+e.dvrState), true);
 	}
 	divs += '</fieldset>';
-	if (e.schedstate == 'scheduled' || e.schedstate == 'running')
-		divs += '<a class="redButton" href="javascript:cancelEpg('+e.start+',\''+e.channel+'\');">'+l('cancel')+'</a>';
+	if (e.dvrState == 'scheduled' || e.dvrState == 'running')
+		divs += '<a class="redButton" href="javascript:cancelEpg('+e.start+',\''+e.dvrUuid+'\',\''+e.channelUuid+'\');">'+l('cancel')+'</a>';
 	else {
-		divs += '<a class="whiteButton" href="javascript:recordEpg('+e.id+',\''+e.channel+'\');">'+l('record')+'</a>';
+		divs += '<a class="whiteButton" href="javascript:recordEpg('+e.eventId+',\''+e.channelUuid+'\');">'+l('record')+'</a>';
 		divs += '<fieldset>';
 		divs += '<div class="row"><label>'+l('config')+'</label><input type="text" readonly="readonly" code="" name="config" value="" onclick="javascript:showSelector(\'config\',this);" /></div>';
 		divs += '</fieldset>';
 	}
-	if (document.getElementById('epg_'+e.id) != null) {
-		document.getElementById('epg_'+e.id).innerHTML = divs;
+	if (document.getElementById('epg_'+e.eventId) != null) {
+		document.getElementById('epg_'+e.eventId).innerHTML = divs;
 		return '';
 	}
 	else {
-		return '<form id="epg_' + e.id + '" title="' + e.title + '" class="panel" channel="'+e.channel+'">' + divs + '</form>';
+		return '<form id="epg_' + e.eventId + '" title="' + e.title + '" class="panel" channel="'+e.channelUuid+'">' + divs + '</form>';
 	}
 }
 
 function readRecordEpg(response) {
-	if (response.success == 1) {
-		loadRecordings('upcoming', true);
-		reloadChannelEpg(response.param);
-		if (epgLoaded['s'] > 0)
-			searchEpg(false,false);
-	}
-	else {
-		alert(l('errorCreatingOrDeleteRecordingEntry'));
-	}
+	loadRecordings('upcoming', true);
+	reloadChannelIdEpg(response.param);
+	if (epgLoaded['s'] > 0)
+		searchEpg(false,false);
 }
 
 function showChannelInfos(tag) {
@@ -430,7 +421,7 @@ function showChannelInfos(tag) {
 				if (current[uuid] != undefined) {
 					for (var i in current[uuid]) {
 						var e = current[uuid][i];
-						if (new Date() > new Date(e.start*1000) && new Date() <= new Date((e.start+e.duration)*1000)) {
+						if (new Date() > new Date(e.start*1000) && new Date() <= new Date(e.stop*1000)) {
 							html += layoutFormat(e, 'current');
 							break;
 						}
@@ -462,28 +453,21 @@ function reloadChannelIdEpg(channel) {
 	}
 }
 
-function cancelEpg(start, channel) {
-	for (var i in upcoming.entries) {
-		var e = upcoming.entries[i];
-		if (e.start == start && e.channel == channel) {
-			var params = 'entryId='+e.id+'&op=cancelEntry';
-			doPostWithParam("dvr", readRecordEpg, params, channel);
-			return;
-		}
-	}
-	alert(l('recordingEntryNotFound'));
+function cancelEpg(start, dvrUuid, channel) {
+	var entries = new Array();
+	entries[0] = dvrUuid;
+	var params = "uuid="+JSON.stringify(entries);
+	doPostWithParam("api/idnode/delete", readRecordEpg, params, channel);
 }
 
 function recordEpg(id, channel) {
 	var form = document.getElementById('epg_'+id);
-	var params = 'eventId='+id+'&op=recordEvent&config_name='+form.config.value;
-	doPostWithParam("dvr", readRecordEpg, params, channel);
+	var params = 'event_id='+id+'&config_uuid='+form.config.getAttribute('code');
+	doPostWithParam("api/dvr/entry/create_by_event", readRecordEpg, params, channel);
 }
 
 function readRecordings(response) {
-	var which = response.path.replace("dvrlist_", "");
-	if (which.indexOf('?')>=0)
-		which = which.substring(0, which.indexOf('?'));
+	var which = response.param;
 	var list = document.getElementById(which);
 	var html = '';
 	var divs = '';
@@ -494,10 +478,10 @@ function readRecordings(response) {
 			html += '<li class="group">'+day+'</li>';
 			lastEpgDay[which] = day;
 		}
-		html += '<li><a href="#rec_' + e.id + '">';
-		if (e.schedstate == 'recording')
+		html += '<li><a href="#rec_' + e.uuid + '">';
+		if (e.dvrState == 'recording')
 			html += icon('../icons/rec.png', '(recording)');
-		if (e.schedstate == 'scheduled')
+		if (e.dvrState == 'scheduled')
 			html += icon('../icons/clock.png', '(scheduled)');
 		html += layoutFormat(e, 'dvr');
 		html += '</a></li>';
@@ -528,6 +512,8 @@ function loadRecordings(which, reload) {
 		limit = start;
 		start=0;
 		if (limit == 0) limit = 20;
+		if (start == 0)
+			lastEpgDay[which] = undefined;
 		var ch = document.getElementById(which);
 		ch.innerHTML = '<li>'+l('loading')+'</li>';
 		if (which == 'upcoming')
@@ -535,12 +521,12 @@ function loadRecordings(which, reload) {
 	}
 	var params = 'start='+start+'&limit='+limit;
 	epgLoaded[which] = start+limit;
-	doGet("dvrlist_"+which+'?'+params, readRecordings);
+	doPostWithParam("api/dvr/entry/grid_"+which, readRecordings, params, which);
 }
 
 function imageClass(url, id) {
 	if (url)
-		return '<img class="'+id+(windows.blackLogo ? ' black':'')+'" src="'+url+'" align="top" width="35px" />';
+		return '<img class="'+id+(window.blackLogo ? ' black':'')+'" src="'+url+'" align="top" width="35px" />';
 	else
 		return '';
 }
@@ -574,7 +560,7 @@ function readChannels(response) {
 		if (sel[sortNo] == undefined) sel[sortNo] = '';
 		app += '<ul id="channel_'+e.uuid+'" title="'+e.name+'"><li>'+l('loading')+'</li></ul>';
 		app += '<form class="panel" id="live_'+e.uuid+'" title="'+e.name+'">';
-		var streamUrl = window.location.protocol+'//'+window.location.host+'/stream/channel/'+e.uuid;
+		var streamUrl = window.location.protocol+'//'+window.location.host+'/play/stream/channel/'+e.uuid;
 		app += '<h1>'+l('liveTv')+'</h1><p>'+streamUrl+'</p>';
 		app += '<a target="_blank" href="'+streamUrl+'" class="whiteButton">'+streamUrl+'</a>';
 		app += '<a target="_blank" href="buzzplayer://'+streamUrl+'" class="whiteButton">Buzzplayer</a>';
@@ -609,16 +595,16 @@ function readCancelEntry(response) {
 }
 
 function readDeleteEntry(response) {
-	if (response.success == 1) {
+//	if (response.success == 1) {
 		if (response.param != undefined)
 			loadRecordings(response.param, true);
 		if (epgLoaded['s'] > 0)
 			searchEpg(false,false);
 		iui.goBack();
-	}
-	else {
-		alert(l('errorDeletingEntry'));
-	}
+//	}
+//	else {
+//		alert(l('errorDeletingEntry'));
+//	}
 }
 
 function cancelEntry(entryId, type) {
@@ -626,8 +612,11 @@ function cancelEntry(entryId, type) {
 }
 
 function deleteEntry(entryId, type) {
+	var entries = new Array();
+	entries[0] = entryId;
+	var params = "uuid="+JSON.stringify(entries);
 	if (confirm(l('reallyDeleteItem')))
-		doPostWithParam('dvr', readDeleteEntry, 'entryId='+entryId+'&op=deleteEntry', type);
+		doPostWithParam('api/idnode/delete', readDeleteEntry, params, type);
 }
 
 var lastSearch = '';
@@ -640,26 +629,26 @@ function readEpg(response) {
 	if (response.entries.length > 0) {
 		for (var i in response.entries) {
 			var e = response.entries[i];
-			if (endTimes[uuid][e.end] == undefined)
-				endTimes[uuid][e.end] = 1;
+			if (endTimes[uuid][e.stop] == undefined)
+				endTimes[uuid][e.stop] = 1;
 			else
-				endTimes[uuid][e.end]++;
+				endTimes[uuid][e.stop]++;
 			var day = getDateFromTimestamp(e.start, true);
 			if (lastEpgDay[uuid] == undefined || lastEpgDay[uuid] != day) {
 				html += '<li class="group">'+day+'</li>';
 				lastEpgDay[uuid] = day;
 			}
 			var epg = '';
-			if (e.schedstate == 'scheduled')
+			if (e.dvrState == 'scheduled')
 				epg += icon('../icons/clock.png', '(scheduled)');
-			else if (e.schedstate == 'recording')
+			else if (e.dvrState == 'recording')
 				epg += icon('../icons/rec.png', '(recording)');
-			else if (e.schedstate == 'completed')
+			else if (e.dvrState == 'completed')
 				epg += icon('../icons/television.png', '(completed)');
-			else if (e.schedstate == 'recordingError' || e.schedstate == 'completedError')
+			else if (e.dvrState == 'recordingError' || e.dvrState == 'completedError')
 				epg += icon('../icons/exclamation.png', '(error)');
 			epg += layoutFormat(e, uuid == 's' ? 'search' : 'epg');
-			html += '<li><a href="#epg_'+e.id+'">' + epg + '</a></li>';
+			html += '<li><a href="#epg_'+e.eventId+'">' + epg + '</a></li>';
 			ins += getEpgForm(e);
 		}
 		if (response.totalCount > epgLoaded[uuid])
@@ -708,15 +697,15 @@ function loadEpg(uuid, chname, reload) {
 	if (uuid == 's')
 		params = 'start='+start+'&limit='+limit+'&title='+encodeURIComponent(lastSearch);
 	epgLoaded[uuid] = start+limit;
-	doPostWithParam("epg", readEpg, params, uuid);
+	doPostWithParam("api/epg/events/grid", readEpg, params, uuid);
 }
 
 function readCurrent(response) {
 	for (var i in response.entries) {
 		var e = response.entries[i];
-		if (current[e.channelid] == undefined)
-			current[e.channelid] = new Array();
-		current[e.channelid][e.start] = e;
+		if (current[e.channelUuid] == undefined)
+			current[e.channelUuid] = new Array();
+		current[e.channelUuid][e.start] = e;
 	}
 	if (location.hash != undefined && location.hash.indexOf('#_tag_') == 0) {
 		var tag = location.hash.replace("#_tag_", "");
@@ -731,19 +720,19 @@ function loadCurrent() {
 		window.setTimeout(function() { loadCurrent(); }, 200);
 		return;
 	}
-	doPost("epg", readCurrent, "start=0&limit="+(channels.length*2));
+	doPost("api/epg/events/grid", readCurrent, "start=0&limit="+(channels.length*2));
 }
 
 function newAutomaticRecorder() {
 	var add = new Object();
-	add.id = 'new';
+	add.uuid = 'new';
 	add.title = '';
 	add.creator = '';
 	add.comment = '';
 	add.weekdays = new Array(1,2,3,4,5,6,7);
 	add.enabled = true;
-	add.prio = 'normal';
-	add.approx_time  = '0';
+	add.prio = '5';
+	add.start  = '';
 	return add;
 }
 
@@ -758,10 +747,10 @@ function readAutomaticRecorderList(response) {
 		var info = '';
 		info += plusMinus(e.pri);
 		info += e.channel ? (info.length > 0 ? ' ' : '') + window.channelNames[e.channel] : '';
-		info += e.tag ? (info.length > 0 ? ' &mdash; ' : '') + e.tag : '';
-		info += e.contenttype ? (info.length > 0 ? ' &mdash; ' : '') + contentGroups[e.contenttype] : '';
-		info += e.config_name ? (info.length > 0 ? ' &mdash; ' : '') + e.config_name : '';
-		info += e.approx_time != '' ? (info.length > 0 ? ' &mdash; ' : '') + getTimeFromMinutes(e.approx_time) : '';
+		info += e.tag ? (info.length > 0 ? ' &mdash; ' : '') + window.channelTags[e.tag] : '';
+		info += e.content_type ? (info.length > 0 ? ' &mdash; ' : '') + window.contentGroups[e.content_type] : '';
+		info += e.config_name ? (info.length > 0 ? ' &mdash; ' : '') + configNames[e.config_name] : '';
+		info += e.start != '' ? (info.length > 0 ? ' &mdash; ' : '') + e.start : '';
 		if (e.weekdays != undefined && e.weekdays.length < 7) {
 			var wds = e.weekdays.join(',');
 			for (var d=1; d<=7; d++) {
@@ -769,7 +758,7 @@ function readAutomaticRecorderList(response) {
 			}
 			info += (info.length > 0 ? ' &mdash; ' : '') + wds;
 		}
-		html += '<li><a' + (e.enabled?'':' class="inactive"')+' href="#ar_' + e.id + '">';
+		html += '<li><a' + (e.enabled?'':' class="inactive"')+' href="#ar_' + e.uuid + '">';
 		html += e.enabled ? icon('../icons/tick.png',l('active')):icon('../icons/control_pause.png', l('inactive'));
 		html += e.title;
 		if (info.length > 0)
@@ -796,7 +785,7 @@ function searchEpg(show, wait, reload) {
 	ch.innerHTML = '<li>'+l('loading')+'</li>';
 	var params = 'start='+start+'&limit='+limit+'&title='+tosearch;
 	epgLoaded['s'] = start+limit;
-	doPostWithParam("epg", readEpg, params, 's');
+	doPostWithParam("api/epg/events/grid", readEpg, params, 's');
 	if (show) {
 		if (wait)
 			setTimeout(function() {iui.showPageById('search');}, 1000);
@@ -806,16 +795,16 @@ function searchEpg(show, wait, reload) {
 }
 
 function loadAutomaticRecorderList() {
-	loadStandardTable("autorec", readAutomaticRecorderList);
+	doGet("api/dvr/autorec/grid", readAutomaticRecorderList, "dir=ASC&sort=name");
 }
 
 function initialLoad() {
-	doGet("ecglist", readContentGroups);
-	doPost("confignames", readConfigs, "op=list");
+	doPost("api/epg/content_type/list", readContentGroups, "full=0");
+	doPost("api/idnode/load", readConfigs, "enum=1&class=dvrconfig");
 	doGet("diskspace", readDiskspace);
 	channelTagsLoaded = false;
 	channelsLoaded = false;
-	loadStandardTable("channeltags", readChannelTags);
+	doPost("api/channeltag/grid", readChannelTags, "");
 	doPost("api/channel/grid", readChannels, "");
 	loadCurrent();
 	loadRecordings('upcoming', true);
@@ -906,17 +895,17 @@ function init() {
 	ini += '<li id="epgGroup" class="group">'+l('electronicProgramGuide')+'</li>';
 	ini += '<li class="noBgImage"><form onsubmit="searchEpg(true,true);return false;"><div style="position:relative;"><input id="searchText" class="round" type="text" name="search" onfocus="showClearSearch(true);" onkeydown="showClearSearch(true);" onblur="showClearSearch(false);" /><img id="clearSearch" src="images/clearsearch.png" style="display:none;position:absolute;top:2px;right:1.2%;cursor:pointer;" onclick="document.getElementById(\'searchText\').value=\'\';document.getElementById(\'searchText\').focus();"></div>';
 	ini += '<div><input id="searchButton" type="button" value="'+l('search')+'" style="width:99%;" onclick="searchEpg(true,false);"/></div></form></li>';
-	ini += '<li><a href="#tags">'+icon('../icons/tag_blue.png')+l('tags')+'</a></li>';
+	ini += '<li><a href="#tags">'+icon('../icons/channel_tags.png')+l('tags')+'</a></li>';
 	ini += '<li><a href="epg.html" target="epg">'+icon('images/timeline.png')+l('timeline')+'</a></li>';
 	ini += '<li><a href="mag.html" target="mag">'+icon('images/book_open.png')+l('magazine')+'</a></li>';
 	ini += '<li class="group">'+l('digitalVideoRecorder')+'</li>';
-	ini += '<li><a href="#upcoming" onclick="loadRecordings(\'upcoming\', true);">'+icon('../icons/clock.png','')+l('upcomingRecordings')+'</a></li>';
-	ini += '<li><a href="#finished" onclick="loadRecordings(\'finished\', true);">'+icon('../icons/television.png','')+l('finishedRecordings')+'</a></li>';
+	ini += '<li><a href="#upcoming" onclick="loadRecordings(\'upcoming\', true);">'+icon('../icons/upcoming_rec.png','')+l('upcomingRecordings')+'</a></li>';
+	ini += '<li><a href="#finished" onclick="loadRecordings(\'finished\', true);">'+icon('../icons/accept.png','')+l('finishedRecordings')+'</a></li>';
 	ini += '<li><a href="#failed" onclick="loadRecordings(\'failed\', true);">'+icon('../icons/exclamation.png','')+l('failedRecordings')+'</a></li>';
-	ini += '<li><a href="#ar" onclick="loadAutomaticRecorderList();">'+icon('../icons/wand.png','')+l('automaticRecorder')+'</a></li>';
+	ini += '<li><a href="#ar" onclick="loadAutomaticRecorderList();">'+icon('../icons/auto_rec.png','')+l('automaticRecorder')+'</a></li>';
 	ini += '<li class="group">'+l('informationStatus')+'</li>';
-	ini += '<li><a href="#subscriptions" onclick="loadSubscriptions();">'+icon('../icons/eye.png')+l('subscriptions')+'</a></li>';
-	ini += '<li><a href="#adapters" onclick="loadAdapters();">'+icon('../icons/pci.png')+l('adapters')+'</a></li>';
+	ini += '<li><a href="#subscriptions" onclick="loadSubscriptions();">'+icon('../icons/subscriptions.png')+l('subscriptions')+'</a></li>';
+	ini += '<li><a href="#adapters" onclick="loadAdapters();">'+icon('../icons/tv_cards.png')+l('adapters')+'</a></li>';
 	ini += '<li><a href="#about" onclick="loadAbout();">'+icon('../icons/information.png')+l('about')+'</a></li>';
 	ini += '<li><a href="../../extjs.html" target="_blank">'+icon('../htslogo.png')+l('desktopSite')+'</a></li>';
 
@@ -935,18 +924,18 @@ function init() {
 	app += '<ul id="genreSelector" class="selector" title="'+l('genre')+'"><li>'+l('loading')+'</li></ul>';
 	app += '<ul id="prioritySelector" class="selector" title="'+l('priority')+'">';
 	for (i in priorities) {
-		app += '<li><a href="javascript:" code="'+priorities[i]+'" onclick="selectItem(\'priority\',this);">'+l('prio.'+priorities[i])+'</li>';
+		app += '<li><a href="javascript:" code="'+i+'" onclick="selectItem(\'priority\',this);">'+l('prio.'+priorities[i])+'</li>';
 	}
 	app += '</ul>';
 	app += '<ul id="startingSelector" class="selector" title="'+l('startingAround')+'">';
-	app += '<li><a code="0" href="javascript:" onclick="selectItem(\'starting\',this);">'+l('any')+'</a></li>';
+	app += '<li><a code="" href="javascript:" onclick="selectItem(\'starting\',this);">'+l('any')+'</a></li>';
 	for (var h=0; h<24; h++) {
 		for (var m=0; m<60; m+=10) {
 			var ms = h*60 + m;
 			var ht = (h < 10 ? '0' : '') + h;
 			var mt = (m < 10 ? '0' : '') + m;
 			var t = ht + ':' + mt;
-			app += '<li><a code="'+ms+'" href="javascript:" onclick="selectItem(\'starting\',this);">'+t+'</a></li>';
+			app += '<li><a code="'+t+'" href="javascript:" onclick="selectItem(\'starting\',this);">'+t+'</a></li>';
 		}
 	}
 	app += '</ul>';

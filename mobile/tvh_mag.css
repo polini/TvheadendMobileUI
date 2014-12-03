@@ -45,6 +45,11 @@ table#epg > tbody > tr > td {
 	background-color:white;
 }
 
+table#epg > tbody > tr > th.black {
+	background-color:#666;
+	color:white;
+}
+
 th, td { 
 	vertical-align:top;
 }

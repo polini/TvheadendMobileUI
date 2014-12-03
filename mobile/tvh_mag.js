@@ -24,10 +24,6 @@ var selectedTag = '';
 var numChannels = 4;
 var channelToColumn = new Array();
 var selectedDay = new Date(new Date().getTime()-hourOffset*60*60*1000);
-var cancelRecordingId;
-var cancelRecordingStart;
-var cancelRecordingChannel;
-var recordChannel;
 var channelNameToId = new Array();
 var lastEpgResponse = new Array();
 var mutex = new Array();
@@ -45,8 +41,8 @@ function readConfigs(response) {
 	window.configSelect = '<select name="config">';
 	for (i in response.entries) {
 		var e = response.entries[i];
-		var selected = (e.identifier == '') ? ' selected="selected"' : '';
-		window.configSelect += '<option value="'+e.identifier+'"'+selected+'>'+e.name+'</option>';
+		var selected = (e.key == '') ? ' selected="selected"' : '';
+		window.configSelect += '<option value="'+e.key+'"'+selected+'>'+e.val+'</option>';
 	}
 	window.configSelect += '</select>';
 	window.configLoaded = true;
@@ -74,7 +70,7 @@ function readEpg(response) {
 	var uuid = undefined;
 	for (var i in response.entries) {
 		var e = response.entries[i];
-		uuid = channelNameToId[e.channel];
+		uuid = e.channelUuid;
 		if (channelToColumn[uuid] != undefined) {
 			var start = new Date(e.start*1000);
 			var box = start.getHours();
@@ -84,15 +80,15 @@ function readEpg(response) {
 			var refDay = new Date(start.getTime()-window.hourOffset*60*60*1000);
 			if (refDay.getDate() == selectedDay.getDate() && refDay.getMonth() == selectedDay.getMonth()) {
 				var td = document.getElementById(box+'_'+window.channelToColumn[uuid]); 
-				var xclass = nvl(e.schedstate);
-				var yclass = (start.getHours() == 20 || start.getHours() == 21)  && e.duration > 60*60 ? 'primetime' : '';
+				var xclass = nvl(e.dvrState);
+				var yclass = (start.getHours() == 20 || start.getHours() == 21)  && (e.stop-e.start) > 60*60 ? 'primetime' : '';
 				var add = e.schedstate != undefined ? '<br />&nbsp;' : '';
-				var epis = e.episode != undefined ? ' <span class="episode">'+e.episode+'</span>' : '';
-				var html = '<tr class="item" start="'+e.start+'" duration="'+e.duration+'"><td class="time '+xclass+'">' + getTimeFromTimestamp(e.start) + add + '</td>\n<td class="content '+yclass+'" id="e_'+e.id+'"><div class="title"><a onclick="showHide(\'e_'+e.id+'\');">'+e.title+epis+'</a></div><div class="subtitle" onclick="showHide(\'e_'+e.id+'\');">'+nvl(e.subtitle)+'</div><div onclick="showHide(\'e_'+e.id+'\');" class="description">'+nvl(e.description)+'</div><div class="duration">'+getDuration(e.duration)+l('hour.short')+' &mdash; '+getTimeFromTimestamp(e.start+e.duration)+'</div><div class="action">';
-				if (e.schedstate == 'scheduled' || e.schedstate == 'recording')
-					html += '<input type="button" value="'+l('cancel')+'" onclick="cancel('+e.id+', \''+e.start+'\',\''+e.channel+'\');" />';
+				var epis = e.episodeOnscreen != undefined ? ' <span class="episode">'+e.episodeOnscreen+'</span>' : '';
+				var html = '<tr class="item" start="'+e.start+'" duration="'+(e.stop-e.start)+'"><td class="time '+xclass+'">' + getTimeFromTimestamp(e.start) + add + '</td>\n<td class="content '+yclass+'" id="e_'+e.eventId+'"><div class="title"><a onclick="showHide(\'e_'+e.eventId+'\');">'+e.title+epis+'</a></div><div class="subtitle" onclick="showHide(\'e_'+e.eventId+'\');">'+nvl(e.subtitle)+'</div><div onclick="showHide(\'e_'+e.eventId+'\');" class="description">'+nvl(e.description)+'</div><div class="duration">'+getDuration(e.stop-e.start)+l('hour.short')+' &mdash; '+getTimeFromTimestamp(e.stop)+'</div><div class="action">';
+				if (e.dvrState == 'scheduled' || e.dvrState == 'recording')
+					html += '<input type="button" value="'+l('cancel')+'" onclick="cancel('+e.eventId+', \''+e.dvrUuid+'\',\''+e.channelName+'\');" />';
 				else
-					html += '<form>'+configSelect + '<br /><input type="button" value="'+l('record')+'" onclick="record('+e.id+', this, \''+e.channel+'\');"/></form>';
+					html += '<form>'+configSelect + '<br /><input type="button" value="'+l('record')+'" onclick="record('+e.eventId+', this, \''+e.channelName+'\');"/></form>';
 				html += '</div></td></tr>';
 				td.innerHTML += html;
 			}
@@ -113,52 +109,22 @@ function showCurrent() {
 	}
 }
 
-function cancel(id, starttime, channel) {
-	var start = 0;
-	var limit = 20;
-	var params = 'start='+start+'&limit='+limit;
+function cancel(id, dvrUuid, channel) {
 	cancelRecordingId = id;
-	cancelRecordingStart = starttime;
-	cancelRecordingChannel = channel;
-	doGet('dvrlist_upcoming?'+params, readRecordingsAndCancelRecording);
-}
-
-function readRecordingsAndCancelRecording(response) {
-	for (var i in response.entries) {
-		var e = response.entries[i];
-		if (e.start == window.cancelRecordingStart && e.channel == window.cancelRecordingChannel) {
-			var params = 'entryId='+e.id+'&op=cancelEntry';
-			doPostWithParam("dvr", readCancelEpg, params);
-			return;
-		}
-	}
-	alert(l('recordingEntryNotFound'));
+	var entries = new Array();
+	entries[0] = dvrUuid;
+	var params = "uuid="+JSON.stringify(entries);
+	doPostWithParam("api/idnode/delete", reloadChannel, params, channel);
 }
 
 function record(id, button, channel) {
-	var params = 'eventId='+id+'&op=recordEvent&config_name='+button.form.config.value;
-	recordChannel = channel;
-	doPostWithParam("dvr", readRecordEpg, params, id);
+	var params = 'event_id='+id+'&config_uuid='+button.form.config.value;
+	doPostWithParam("api/dvr/entry/create_by_event", reloadChannel, params, channel);
 }
 
-function readCancelEpg(response) {
-	if (response.success == 1) {
-		lastEpgResponse[channelNameToId[cancelRecordingChannel]] = undefined;
-		initEpg();
-	}
-	else {
-		alert(l('errorCreatingOrDeleteRecordingEntry'));
-	}
-}
-
-function readRecordEpg(response) {
-	if (response.success == 1) {
-		lastEpgResponse[channelNameToId[recordChannel]] = undefined;
-		initEpg();
-	}
-	else {
-		alert(l('errorCreatingOrDeleteRecordingEntry'));
-	}
+function reloadChannel(response) {
+	lastEpgResponse[channelNameToId[response.param]] = undefined;
+	initEpg();
 }
 
 function showHide(id) {
@@ -172,7 +138,7 @@ function showHide(id) {
 function loadEpgByChannel(channel) {
 	if (mutex[channel] == undefined) {
 		mutex[channel] = true;
-		doPostWithParam("epg", readEpg, 'start=0&limit=200&channel='+encodeURIComponent(channel), channel);
+		doPostWithParam("api/epg/events/grid", readEpg, 'start=0&limit=200&channel='+encodeURIComponent(channel), channel);
 	}
 }
 
@@ -191,11 +157,11 @@ function initEpg() {
 			var ch = channels[i];
 			if (selectedTag == '' || (','+ch.tags+',').indexOf(','+selectedTag+',') >= 0) {
 				if (cnt-channelOffset >= 0 && cnt-channelOffset < numChannels) {
-					var html = '<div><span class="link" onclick="showHide(\'s_'+(cnt-channelOffset)+'\');">'+image(getIcon(ch), 'middle',50,window.blackLogo) + ch.name + '</span>';
+					var html = '<div><span class="link" onclick="showHide(\'s_'+(cnt-channelOffset)+'\');">'+image(getIcon(ch), 'middle',50,false) + ch.name + '</span>';
 					if (cnt-channelOffset==numChannels-1) {
 						html += '<span class="link" style="float:right;" onclick="pageChannels(+1);">'+icon('images/resultset_next.png')+'</span>';
 					}
-					var streamUrl = window.location.protocol+'//'+window.location.host+'/stream/channel/'+ch.uuid;
+					var streamUrl = window.location.protocol+'//'+window.location.host+'/play/stream/channel/'+ch.uuid;
 					html += '</div><div id="s_'+(cnt-channelOffset)+'" class="stream">';
 					html += '<div><a target="_blank" href="'+streamUrl+'"><button>HTTP</button></a></div>';
 					html += '<div><a target="_blank" href="buzzplayer://'+streamUrl+'"><button>Buzzplayer</button></a></div></div>';
@@ -235,12 +201,12 @@ function pageDate(plus) {
 function readChannelTags(response) {
 	window.channelTags = response.entries;
 	var sel = window.selectedTag == ''? ' selected' : '';
-	var html = icon('../icons/tag_blue.png')+'<a id="t_" onclick="selectTag(\'\');" class="link'+sel+'">'+l('allChannels')+'</a>';
+	var html = icon('../icons/channel_tags.png')+'<a id="t_" onclick="selectTag(\'\');" class="link'+sel+'">'+l('allChannels')+'</a>';
 	for (var i=0; i<response.entries.length; i++) {	
 		var e = response.entries[i];
 		if (e.enabled == '1' && e.internal == '0') {
-			sel = window.selectedTag == e.id ? ' selected' : '';
-			html += '<a id="t_'+e.id+'" onclick="selectTag('+e.id+');" class="link'+sel+'">'+e.name+'</a>\n';
+			sel = window.selectedTag == e.uuid ? ' selected' : '';
+			html += '<a id="t_'+e.uuid+'" onclick="selectTag(\''+e.uuid+'\');" class="link'+sel+'">'+e.name+'</a>\n';
 		}
 	}
 	document.getElementById('tags').innerHTML = html;
@@ -255,8 +221,9 @@ function selectTag(tag) {
 
 function init() {
 	self.name = 'mag';
-	doPost("confignames", readConfigs, "op=list");
-	loadStandardTable("channeltags", readChannelTags);
+	doPost("api/idnode/load", readConfigs, "enum=1&class=dvrconfig");
+	//	doPost("api/epg/content_type/list", readContentGroups, "full=0");
+	doPost("api/channeltag/grid", readChannelTags, "");
 	doPost("api/channel/grid", readChannels, "");
 	append('<span style="float:right;"><a href="mobile.html" target="tvheadend"><img width="50px" src="images/tvheadend128.png" title="'+l('backToMobileUi')+'"></a></span><div id="tags"></div><table style="width:100%;"><tr><td style="width:95%;"><div id="date"><span class="link" onclick="pageDate(-1);">'+icon('images/date_previous.png')+'</span><span id="day"></span><span class="link" onclick="pageDate(1);">'+icon('images/date_next.png')+'</span></td><td style="white-space:nowrap;vertical-align:bottom;"><a class="link" onclick="cols(1);">'+icon('images/layout_add.png')+'</a><a class="link" onclick="cols(-1);">'+icon('images/layout_delete.png')+'</a></td></tr></table><table id="epg"></table>');
 	initTable();
@@ -281,7 +248,7 @@ function cols(delta) {
 function initTable() {
 	var html = '<tr><th style="width:10px;"><span class="link" onclick="pageChannels(-1);">'+icon('images/resultset_previous.png')+'</span></th>';
 	for (var j=0; j<numChannels;j++) {
-		html += '<th style="width:'+(100/numChannels)+'%;" id="c_'+j+'"></th>';
+		html += '<th class="'+(window.blackLogo?'black':'')+'" style="width:'+(100/numChannels)+'%;" id="c_'+j+'"></th>';
 	}
 	html += '</tr>';
 	for (var i=4;i<=24; i+=4) {
