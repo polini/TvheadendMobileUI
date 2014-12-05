@@ -87,6 +87,9 @@ function getAutomaticRecorderForm(e) {
 		divs += '<div class="row"><label>'+longdays[d]+'</label><div class="toggle" onclick="return;" name="enabled" toggled="'+(e.weekdays.join(',').indexOf(''+d)>=0) + '"><span class="thumb"></span><span class="toggleOn">'+days[d]+'</span><span class="toggleOff">'+days[d]+'</span></div></div>';
 	}
 	var starting = e.start;
+	if (starting == 'Any') starting = l('any');
+	divs += '<div class="row"><label>'+l('minDuration')+'</label><input type="text" code="'+(e.minduration)+'" readonly="readonly" name="minDuration" value="' + (e.minduration>0?getDuration(e.minduration)+l('hour.short'):l('any')) + '" onclick="showSelector(\'duration\',this);" /></div>';
+	divs += '<div class="row"><label>'+l('maxDuration')+'</label><input type="text" code="'+(e.maxduration)+'" readonly="readonly" name="maxDuration" value="' + (e.maxduration>0?getDuration(e.maxduration)+l('hour.short'):l('any')) + '" onclick="showSelector(\'duration\',this);" /></div>';
 	divs += '<div class="row"><label>'+l('startingAround')+'</label><input type="text" code="'+nvl(e.start)+'" readonly="readonly" name="startingAround" value="' + starting + '" onclick="showSelector(\'starting\',this);" /></div>';
 	divs += '<div class="row"><label>'+l('priority')+'</label><input type="text" code="'+nvl(e.pri)+'" readonly="readonly" name="priority" value="' + (e.pri != undefined ? l('prio.'+priorities[e.pri]) : '') + '" onclick="showSelector(\'priority\',this);" /></div>';
 	divs += '</fieldset>';
@@ -98,8 +101,8 @@ function getAutomaticRecorderForm(e) {
 	if (e.id != 'new') {
 		divs += '<p>&nbsp;</p><a class="redButton" href="javascript:deleteAutomaticRecorder(\''+e.uuid+'\');">'+l('delete')+'</a>';
 	}
-	if (document.getElementById('ar_'+e.id) != null) {
-		document.getElementById('ar_'+e.id).innerHTML = divs;
+	if (document.getElementById('ar_'+e.uuid) != null) {
+		document.getElementById('ar_'+e.uuid).innerHTML = divs;
 		return '';
 	}
 	else {
@@ -177,6 +180,8 @@ function saveAutomaticRecorder(id) {
 	entries[0].content_type = form.contenttype.getAttribute('code');
 	entries[0].config_name = form.config_name.getAttribute('code');
 	entries[0].start = form.startingAround.getAttribute('code');
+	entries[0].minduration = form.minDuration.getAttribute('code');
+	entries[0].maxduration = form.maxDuration.getAttribute('code');
 	entries[0].pri = form.priority.getAttribute('code');
 	entries[0].creator = form.creator.value;
 	entries[0].comment = form.comment.value;
@@ -750,7 +755,9 @@ function readAutomaticRecorderList(response) {
 		info += e.tag ? (info.length > 0 ? ' &mdash; ' : '') + window.channelTags[e.tag] : '';
 		info += e.content_type ? (info.length > 0 ? ' &mdash; ' : '') + window.contentGroups[e.content_type] : '';
 		info += e.config_name ? (info.length > 0 ? ' &mdash; ' : '') + configNames[e.config_name] : '';
-		info += e.start != '' ? (info.length > 0 ? ' &mdash; ' : '') + e.start : '';
+		info += e.start != '' && e.start != 'Any' ? (info.length > 0 ? ' &mdash; ' : '') + e.start : '';
+		info += e.minduration != '' ? (info.length > 0 ? ' &mdash; ' : '') + "&ge;"+getDuration(e.minduration)+l('hour.short') : '';
+		info += e.maxduration != '' ? (info.length > 0 ? ' &mdash; ' : '') + "&le;"+getDuration(e.maxduration)+l('hour.short') : '';
 		if (e.weekdays != undefined && e.weekdays.length < 7) {
 			var wds = e.weekdays.join(',');
 			for (var d=1; d<=7; d++) {
@@ -804,8 +811,8 @@ function initialLoad() {
 	doGet("diskspace", readDiskspace);
 	channelTagsLoaded = false;
 	channelsLoaded = false;
-	doPost("api/channeltag/grid", readChannelTags, "");
-	doPost("api/channel/grid", readChannels, "");
+	doPost("api/channeltag/grid", readChannelTags, "sort=name&dir=ASC&all=1");
+	doPost("api/channel/grid", readChannels, "start=0&limit=999999999&sort=number&dir=ASC&all=1");
 	loadCurrent();
 	loadRecordings('upcoming', true);
 }
@@ -927,8 +934,17 @@ function init() {
 		app += '<li><a href="javascript:" code="'+i+'" onclick="selectItem(\'priority\',this);">'+l('prio.'+priorities[i])+'</li>';
 	}
 	app += '</ul>';
+	app += '<ul id="durationSelector" class="selector" title="'+l('duration')+'">';
+	app += '<li><a href="javascript:" code="0" onclick="selectItem(\'duration\',this);">'+l('any')+'</li>';
+	for (var m=60; m<120*60; m+=60) {
+		app += '<li><a href="javascript:" code="'+m+'" onclick="selectItem(\'duration\',this);">'+getDuration(m)+l('hour.short')+'</li>';
+	}
+	for (var m=120*60; m<=24*60*60; m+=30*60) {
+		app += '<li><a href="javascript:" code="'+m+'" onclick="selectItem(\'duration\',this);">'+getDuration(m)+l('hour.short')+'</li>';
+	}
+	app += '</ul>';
 	app += '<ul id="startingSelector" class="selector" title="'+l('startingAround')+'">';
-	app += '<li><a code="" href="javascript:" onclick="selectItem(\'starting\',this);">'+l('any')+'</a></li>';
+	app += '<li><a code="Any" href="javascript:" onclick="selectItem(\'starting\',this);">'+l('any')+'</a></li>';
 	for (var h=0; h<24; h++) {
 		for (var m=0; m<60; m+=10) {
 			var ms = h*60 + m;

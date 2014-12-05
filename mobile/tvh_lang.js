@@ -101,7 +101,9 @@ var i18nstrings =
 	'diskspace': 'Speicherplatz',
 	'magazine': 'Programmzeitschrift',
 	'backToMobileUi': 'zurück zur mobilen Ansicht',
-	'mobileUi': 'mobile Ansicht'
+	'mobileUi': 'mobile Ansicht',
+	'minDuration': 'Min. Dauer',
+	'maxDuration': 'Max. Dauer'
 },
 'en':
 {
@@ -194,6 +196,8 @@ var i18nstrings =
 	'diskspace': 'Disk space',
 	'magazine': 'Listings',
 	'backToMobileUi': 'back to mobile UI',
-	'mobileUi': 'mobile UI'
+	'mobileUi': 'mobile UI',
+	'minDuration': 'min. duration',
+	'maxDuration': 'max. duration'
 }
 };

@@ -222,8 +222,8 @@ function init() {
 	self.name = 'mag';
 	doPost("api/idnode/load", readConfigs, "enum=1&class=dvrconfig");
 	//	doPost("api/epg/content_type/list", readContentGroups, "full=0");
-	doPost("api/channeltag/grid", readChannelTags, "");
-	doPost("api/channel/grid", readChannels, "");
+	doPost("api/channeltag/grid", readChannelTags, "sort=name&dir=ASC&all=1");
+	doPost("api/channel/grid", readChannels, "start=0&limit=999999999&sort=number&dir=ASC&all=1");
 	append('<span style="float:right;"><a href="mobile.html" target="tvheadend"><img width="50px" src="images/tvheadend128.png" title="'+l('backToMobileUi')+'"></a></span><div id="tags"></div><table style="width:100%;"><tr><td style="width:95%;"><div id="date"><span class="link" onclick="pageDate(-1);">'+icon('images/date_previous.png')+'</span><span id="day"></span><span class="link" onclick="pageDate(1);">'+icon('images/date_next.png')+'</span></td><td style="white-space:nowrap;vertical-align:bottom;"><a class="link" onclick="cols(1);">'+icon('images/layout_add.png')+'</a><a class="link" onclick="cols(-1);">'+icon('images/layout_delete.png')+'</a></td></tr></table><table id="epg"></table>');
 	initTable();
 	initEpg();

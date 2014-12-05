@@ -241,7 +241,7 @@ function readConfigs(response) {
 		window.configSelect += '<option value="'+e.key+'"'+selected+'>'+e.val+'</option>';
 	}
 	window.configSelect += '</select>';
-	doPost("api/channeltag/grid", readChannelTags, "");
+	doPost("api/channeltag/grid", readChannelTags, "sort=name&dir=ASC&all=1");
 }
 
 function showTag(tag) {
@@ -260,13 +260,13 @@ function readChannelTags(response) {
 			selected = ' selected="selected"';
 		}
 		window.channelTags[e.uuid] = e.name;
-		sel[e.id] = '<option value="'+e.uuid+'"'+selected+'>'+e.name+'</option>';
+		sel[e.uuid] = '<option value="'+e.uuid+'"'+selected+'>'+e.name+'</option>';
 	}
 	tagSelect = '<select onchange="showTag(this.value);">';
 	for (var i in sel)
 		tagSelect += sel[i];
 	tagSelect += '</select>';
-	doPost("api/channel/grid", readChannels, "");
+	doPost("api/channel/grid", readChannels, "start=0&limit=999999999&sort=number&dir=ASC&all=1");
 }
 
 function loadMoreEpg() {
