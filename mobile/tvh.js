@@ -16,9 +16,11 @@ function layoutFormat(e, type) {
 	var ret = layout[type];
 	if (e.title == e.subtitle)
 		e.subtitle = undefined;
+	if (e.disp_subtitle == undefined && e.subtitle != undefined)
+		e.disp_subtitle = e.subtitle;
 	ret = ret.replace(/%ti/g, nvl(e.disp_title ? e.disp_title : e.title));
-	ret = ret.replace(/%ds_su/g, nvl(e.subtitle) != '' ? ' &mdash; '+e.subtitle : '');
-	ret = ret.replace(/%su/g, nvl(e.subtitle));
+	ret = ret.replace(/%ds_su/g, nvl(e.disp_subtitle) != '' ? ' &mdash; '+e.disp_subtitle : '');
+	ret = ret.replace(/%su/g, nvl(e.disp_subtitle));
 	ret = ret.replace(/%ch/g, nvl(e.channelname ? e.channelname : e.channelName));
 	ret = ret.replace(/%ds_ep/g, nvl(e.episode) != '' ? ' &mdash; '+e.episode : '');
 	ret = ret.replace(/%ep/g, nvl(e.episode));
@@ -214,9 +216,28 @@ function readContentGroups(response) {
 }
 
 function readDiskspace(response) {
-	if (response.totaldiskspace > 0) {
-		var occup = 100 - (100*response.freediskspace/response.totaldiskspace);
-		document.getElementById('diskspace').innerHTML = icon('../icons/drive.png','left')+getProgressBar(200, occup) + Math.round(occup) + '%';
+	if (response.messages != undefined && response.messages[0].totaldiskspace > 0) {
+		var occup = 100 - (100*response.messages[0].freediskspace/response.messages[0].totaldiskspace);
+		var val = response.messages[0].freediskspace;
+                var unit = 'B';
+                if (val > 1024) {
+                        val /= 1024;
+                        unit = 'KB';
+                }
+                if (val > 1024) {
+                        val /= 1024;
+                        unit = 'MB';
+                }
+                if (val > 1024) {
+                        val /= 1024;
+                        unit = 'GB';
+                }
+                if (val > 1024) {
+                        val /= 1024;
+                        unit = 'TB';
+                }
+                val = Math.round(val*10)/10;
+		document.getElementById('diskspace').innerHTML = icon('../icons/drive.png','left')+getProgressBar(200, occup) + Math.round(occup) + '% <span class="small">('+val+' '+unit+')</span>';
 	}
 }
 
@@ -244,18 +265,18 @@ function readSubscriptions(response) {
 	append(app);
 }
 
-function readAdapters(response) {
+function readInputs(response) {
 	var html = '';
 	var app = '';
 	for (var i in response.entries) {	
 		var e = response.entries[i];
-		html += '<li><a href="#adapter_'+e.identifier+'">'+e.name+'<div class="small">'+e.path+' &mdash; '+e.services+' '+l('services')+' &mdash; '+e.muxes+' ' + l('muxes')+'</div>';
+		html += '<li><a href="#input_'+e.uuid+'">'+e.input+'<div class="small">'+'</div>';
 		if (e.signal != undefined)
 			html += getProgressBar(200, e.signal) + e.signal + '%'; 
 		html += '</a></li>';
-		app += getAdapterForm(e);
+		app += getInputForm(e);
 	}
-	document.getElementById('adapters').innerHTML = html;
+	document.getElementById('inputs').innerHTML = html;
 	append(app);
 }
 
@@ -263,8 +284,8 @@ function loadSubscriptions() {
 	doGet('api/status/subscriptions', readSubscriptions);
 }
 
-function loadAdapters() {
-	doPost('api/hardware/tree', readAdapters, "uuid=root");
+function loadInputs() {
+	doGet('api/status/inputs', readInputs);
 }
 
 function readChannelTags(response) {
@@ -297,12 +318,12 @@ function readChannelTags(response) {
 function getRecordingForm(e, type) {
 	var divs = getIntro(e);
 	divs += '<fieldset>';
-	divs += textField('episode', e.episodeOnscreen, true);
+	divs += textField('episode', e.episode, true);
 	divs += textField('channel', e.channelname, true);
 	divs += textField('priority', (e.pri != undefined ? l('prio.'+priorities[e.pri]) : ''), true);
 	divs += textField('start', getDateTimeFromTimestamp(e.start, true), true);
 	divs += textField('end', getDateTimeFromTimestamp(e.stop, true), true);
-	divs += textField('duration', getDuration(e.duration)+l('hour.short'), true);
+	divs += textField('duration', getDuration(e.stop-e.start)+l('hour.short'), true);
 	divs += textField('config', configNames[e.config_name], true);
 	var status = l('status.'+e.status)!='status.'+e.status ? l('status.'+e.status) : e.status;
 	divs += textField('status', status, true);
@@ -336,10 +357,12 @@ function getSubscriptionForm(e) {
 	}
 }
 
-function getAdapterForm(e) {
+function getInputForm(e) {
 	divs = '';
 	divs += '<fieldset>';
-	divs += textField('name', e.name, true);
+	divs += textField('name', e.input, true);
+	divs += textField('subs', e.subs, true);
+	divs += textField('weight', e.weight, true);
 	divs += textField('path', e.path, true);
 	divs += textField('devicename', e.devicename, true);
 	divs += textField('deliverysystem', e.deliverySystem, true);
@@ -347,12 +370,12 @@ function getAdapterForm(e) {
 	divs += textField('muxes', e.muxes, true);
 	divs += textField('signal', e.signal, true);
 	divs += '</fieldset>';
-	if (document.getElementById('adapter_'+e.id) != null) {
-		document.getElementById('adapter_'+e.id).innerHTML = divs;
+	if (document.getElementById('input_'+e.uuid) != null) {
+		document.getElementById('input_'+e.uuid).innerHTML = divs;
 		return '';
 	}
 	else {
-		return '<form id="adapter_' + e.identifier + '" title="' + e.name + '" class="panel">' + divs + '</form>';
+		return '<form id="input_' + e.uuid + '" title="' + e.input + '" class="panel">' + divs + '</form>';
 	}
 }
 
@@ -382,7 +405,19 @@ function getEpgForm(e) {
 	divs += textField('start', getDateTimeFromTimestamp(e.start, true), true);
 	divs += textField('end', getDateTimeFromTimestamp(e.stop, true), true);
 	divs += textField('duration', getDuration(e.stop-e.start)+l('hour.short'), true);
-	divs += textField('genre', contentGroups[e.contenttype], true);
+	var genres = '';
+	for (i in e.genre) {
+		var dg = e.genre[i];
+		var hg = dg - dg%16;
+		var g = undefined;
+		if (hg != dg && contentGroups[hg] != undefined)
+			g = '[ '+contentGroups[hg]+' ]';
+		if (contentGroups[dg] != undefined)
+			g = ((g!=undefined)?g+' ':'') + contentGroups[dg];
+		if (g != undefined && genres.indexOf(g)<0)
+			genres += (genres!=''?', ':'')+g;
+	}
+	divs += textField('genre', genres, true);
 	if (e.dvrState != "") {
 		divs += textField('status', l('status.'+e.dvrState), true);
 	}
@@ -524,7 +559,8 @@ function loadRecordings(which, reload) {
 		if (which == 'upcoming')
 			upcoming = undefined;
 	}
-	var params = 'start='+start+'&limit='+limit;
+	var dir = (which == 'upcoming') ? 'ASC' : 'DESC';
+	var params = 'sort=start_real&dir='+dir+'&start='+start+'&limit='+limit;
 	epgLoaded[which] = start+limit;
 	doPostWithParam("api/dvr/entry/grid_"+which, readRecordings, params, which);
 }
@@ -698,7 +734,7 @@ function loadEpg(uuid, chname, reload) {
 	endTimes[uuid] = new Array();
 	if (start < 0)
 		start = 0;
-	var params = 'start='+start+'&limit='+limit+'&channel='+encodeURIComponent(chname);
+	var params = 'start='+start+'&limit='+limit+'&channel='+uuid;
 	if (uuid == 's')
 		params = 'start='+start+'&limit='+limit+'&title='+encodeURIComponent(lastSearch);
 	epgLoaded[uuid] = start+limit;
@@ -806,12 +842,12 @@ function loadAutomaticRecorderList() {
 }
 
 function initialLoad() {
-	doPost("api/epg/content_type/list", readContentGroups, "full=0");
+	doPost("api/epg/content_type/list", readContentGroups, "full=1");
 	doPost("api/idnode/load", readConfigs, "enum=1&class=dvrconfig");
-	doGet("diskspace", readDiskspace);
+	doPost("comet/poll", readDiskspace, "boxid=&immediate=0");
 	channelTagsLoaded = false;
 	channelsLoaded = false;
-	doPost("api/channeltag/grid", readChannelTags, "sort=name&dir=ASC&all=1");
+	doPost("api/channeltag/grid", readChannelTags, "sort=index&dir=ASC&all=1");
 	doPost("api/channel/grid", readChannels, "start=0&limit=999999999&sort=number&dir=ASC&all=1");
 	loadCurrent();
 	loadRecordings('upcoming', true);
@@ -870,10 +906,10 @@ function reload(initial) {
 			if (initial)
 				showInitialPage('subscription');
 		}
-		if (location.hash.indexOf('#_adapter') == 0) {
-			loadAdapters();
+		if (location.hash.indexOf('#_input') == 0) {
+			loadInput();
 			if (initial)
-				showInitialPage('adapter');
+				showInitialPage('input');
 		}
 		if (location.hash.indexOf('#_search') == 0)
 			if (!initial)
@@ -912,9 +948,9 @@ function init() {
 	ini += '<li><a href="#ar" onclick="loadAutomaticRecorderList();">'+icon('../icons/auto_rec.png','')+l('automaticRecorder')+'</a></li>';
 	ini += '<li class="group">'+l('informationStatus')+'</li>';
 	ini += '<li><a href="#subscriptions" onclick="loadSubscriptions();">'+icon('../icons/subscriptions.png')+l('subscriptions')+'</a></li>';
-	ini += '<li><a href="#adapters" onclick="loadAdapters();">'+icon('../icons/tv_cards.png')+l('adapters')+'</a></li>';
+	ini += '<li><a href="#inputs" onclick="loadInputs();">'+icon('../icons/stream.png')+l('inputs')+'</a></li>';
 	ini += '<li><a href="#about" onclick="loadAbout();">'+icon('../icons/information.png')+l('about')+'</a></li>';
-	ini += '<li><a href="../../extjs.html" target="_blank">'+icon('../htslogo.png')+l('desktopSite')+'</a></li>';
+	ini += '<li><a href="../../extjs.html" target="_blank">'+icon('../img/logo.png')+l('desktopSite')+'</a></li>';
 
 	document.getElementById('home').innerHTML += ini;
 	var app = '';
@@ -924,7 +960,7 @@ function init() {
 	app += '<ul id="finished" title="'+l('finishedRecordings')+'"><li>'+l('loading')+'</li></ul>';
 	app += '<ul id="failed" title="'+l('failedRecordings')+'"><li>'+l('loading')+'</li></ul>';
 	app += '<ul id="subscriptions" title="'+l('subscriptions')+'"><li>'+l('loading')+'</li></ul>';
-	app += '<ul id="adapters" title="'+l('adapters')+'"><li>'+l('loading')+'</li></ul>';
+	app += '<ul id="inputs" title="'+l('inputs')+'"><li>'+l('loading')+'</li></ul>';
 	app += '<ul id="about" title="'+l('about')+'"><li>'+l('loading')+'</li></ul>';
 	app += '<ul id="search" title="'+l('search')+'"><li>'+l('loading')+'</li></ul>';
 	app += '<ul id="tagSelector" class="selector" title="'+l('tag')+'"><li>'+l('loading')+'</li></ul>';
