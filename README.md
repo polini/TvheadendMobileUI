@@ -60,9 +60,11 @@ or create symlink
 
 The target directory may vary. It could also be /usr/share/tvheadend/src/webui/static/mobile.
 
-### OpenELEC Tvheadend add-on
+### LibreELEC / OpenELEC Tvheadend add-on
 
 When you installed Tvheadend as an OpenELEC add-on, you can not use TvheadendMobileUI at the moment, as the static html pages are bundled in the Tvheadend binary.
+
+Please have a look at https://github.com/nbittmann/webinterface.NiceTVH for an add-on, which you can use with LibreELEC / OpenELEC.
 
 ## Usage
 
